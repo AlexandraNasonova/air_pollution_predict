@@ -11,8 +11,11 @@ POLLUTANTS_CODES = [7, 6001, 5, 10, 1, 8]
 
 
 def create_new_dir():
+    path = os.path.join(os.path.dirname(__file__), "data")
+    pathlib.Path(path).mkdir(exist_ok=True)
+
     date_time_now = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
-    path = os.path.join(os.path.dirname(__file__), "data", date_time_now)
+    path = os.path.join(path, date_time_now)
     pathlib.Path(path).mkdir()
     return path
 
