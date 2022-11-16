@@ -1,6 +1,9 @@
 # roject specific files and folders
 aqreport_loader/data/*
-
+datasources/aq/*
+datasources/industrial/*
+datasources/weather/*
+datasources/aq_ne_all/*
 
 
 # Byte-compiled / optimized / DLL files
