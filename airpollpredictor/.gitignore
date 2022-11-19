@@ -4,6 +4,8 @@ datasources/aq/*
 datasources/industrial/*
 datasources/weather/*
 datasources/aq_ne_all/*
+datasources/aq_min/*
+
 
 
 # Byte-compiled / optimized / DLL files
