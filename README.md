@@ -13,3 +13,4 @@
 ### Этапы выполнения:
 * [План проекта](https://github.com/AlexandraNasonova/air_pollution_predict/blob/master/docs/Plan.pdf)
 * [Описание данных](https://github.com/AlexandraNasonova/air_pollution_predict/blob/master/docs/Datasources.pdf)
+* [Исследовательский анализ данных](https://github.com/AlexandraNasonova/air_pollution_predict/blob/master/docs/EDA.pdf)
