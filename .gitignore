@@ -180,3 +180,5 @@ cython_debug/
 
 develop/backup/*
 develop/postgres_db/.pgadmin/*
+
+.idea
