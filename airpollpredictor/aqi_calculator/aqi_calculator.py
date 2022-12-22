@@ -1,10 +1,7 @@
-from functools import partial
-
 import pandas as pd
-from numpy_ext import rolling_apply
-import aqi_dto as aqd
-import pollutant_dto as pld
-import breakpoint_dto as bpd
+import aqi_calculator.aqi_dto as aqd
+import aqi_calculator.pollutant_dto as pld
+import aqi_calculator.breakpoint_dto as bpd
 
 _BREAKPOINTS_COUNT = 7
 
