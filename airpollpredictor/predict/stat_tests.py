@@ -11,12 +11,21 @@ from copy import deepcopy
 class StatTestWrapper:
 
     @staticmethod
-    def pre_analise(ts: pd.DataFrame, diffs_needed: [] = None, is_box_cox_needed=False, source_plots_needed=False,
-                    dif_plot_needed=False, box_cox_plot_needed=False, lags=None):
+    def get_residuals_analysis(model):
+        model.plot_diagnostics(figsize=(21, 7))
+        plt.show()
+        StatTestWrapper.check_stationarity_kpss(model.resid)
+        StatTestWrapper.check_resid_ljung_box(model.resid)
+        StatTestWrapper.check_resid_durbin_watson(model.resid)
+        StatTestWrapper.check_resid_wilcoxon(model.resid)
+
+    @staticmethod
+    def pre_analise(ts: pd.DataFrame, column_name: str, diffs_needed: [] = None, is_box_cox_needed=False,
+                    source_plots_needed=False, dif_plot_needed=False, box_cox_plot_needed=False, lags=None):
         try:
             ts_n = deepcopy(ts)
             if is_box_cox_needed:
-                ts_n = TransformHelper.apply_best_box_cox(ts_n, plots_needed=box_cox_plot_needed)
+                ts_n = TransformHelper.apply_best_box_cox(ts_n, column_name, plots_needed=box_cox_plot_needed)
             source_plots_shown = False
             if diffs_needed is not None and len(diffs_needed) > 0:
                 for dif in diffs_needed:

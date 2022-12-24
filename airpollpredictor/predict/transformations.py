@@ -1,5 +1,6 @@
 from copy import deepcopy
 import pandas as pd
+from pmdarima.preprocessing import FourierFeaturizer
 from sklearn.preprocessing import PowerTransformer
 from scipy.special import boxcox1p
 from predict.plot_helper import PlotHelper
@@ -10,12 +11,22 @@ pt = PowerTransformer(method='yeo-johnson')
 class TransformHelper:
 
     @staticmethod
-    def apply_best_box_cox(ts: pd.DataFrame, plots_needed=False):
+    def apply_fourier(ts: pd.DataFrame, m=365.25, k=1):
+        four_terms = FourierFeaturizer(m=m, k=k)
+        y_prime, exog = four_terms.fit_transform(ts)
+        exog['date'] = y_prime.index
+        exog = exog.set_index(exog['date'])
+        exog.index.freq = 'D'
+        exog = exog.drop(columns=['date'])
+        return exog
+
+    @staticmethod
+    def apply_best_box_cox(ts: pd.DataFrame, column_name: str, plots_needed=False):
         ts_boxcox = deepcopy(ts)
         pt = PowerTransformer(method='yeo-johnson')
-        pt.fit(ts_boxcox['Concentration'].array.reshape(-1, 1))
+        pt.fit(ts_boxcox[column_name].array.reshape(-1, 1))
         print(f'Best lambda: {pt.lambdas_}')
-        ts_boxcox['Concentration'] = boxcox1p(ts_boxcox['Concentration'], pt.lambdas_[0])
+        ts_boxcox[column_name] = boxcox1p(ts_boxcox[column_name], pt.lambdas_[0])
         if plots_needed:
             PlotHelper.plot_ts(ts_boxcox)
         return ts_boxcox
