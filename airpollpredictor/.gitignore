@@ -1,10 +1,11 @@
 # roject specific files and folders
 aqreport_loader/data/*
-datasources/aq/*
+datasources/aq_NL_tot_11_2022/*
 datasources/industrial/*
 datasources/weather/*
 datasources/aq_ne_all/*
 datasources/aq_min/*
+datasources/aqi_calc_old/*
 datasources/eda/*
 datasources/old/*
 

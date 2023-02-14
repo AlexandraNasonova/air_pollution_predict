@@ -4,7 +4,7 @@ import pathlib
 import time
 import requests
 
-URL_POLLUTANT_LIST = "https://fme.discomap.eea.europa.eu/fmedatastreaming/AirQualityDownload/AQData_Extract.fmw?CountryCode=$country$&CityName=&Pollutant=$pollutant_id$&Year_from=$year_from$&Year_to=$year_to$&Station=&Samplingpoint=&Source=All&Output=TEXT&UpdateDate=&TimeCoverage=Year"
+URL_POLLUTANT_LIST = "https://fme.discomap.eea.europa.eu/fmedatastreaming/AirQualityDownload/AQData_Extract.fmw?CountryCode=$country$&CityName=$city$&Pollutant=$pollutant_id$&Year_from=$year_from$&Year_to=$year_to$&Station=$station$&Samplingpoint=&Source=All&Output=TEXT&UpdateDate=&TimeCoverage=Year"
 RELOAD_COUNTER = 2
 RELOAD_REPEATING_COUNTER = 5
 POLLUTANTS_CODES = [7, 6001, 5, 10, 1, 8]
@@ -26,15 +26,25 @@ def create_new_pollutant_dir(save_path, pollutant_id):
     return path
 
 
-async def pollutants_txt_lists_load(country=None, year_from=2013, year_to=datetime.datetime.now().year) -> str:
+async def pollutants_txt_lists_load(pollutant_codes: list=None, country=None, city=None, station=None, year_from=2013, station_per_pollutant: dict=None,
+                                    year_to=datetime.datetime.now().year) -> str:
     save_path = create_new_dir()
     print(f"Directory {save_path} created")
-    for i in range(len(POLLUTANTS_CODES)):
-        url = URL_POLLUTANT_LIST.replace("$pollutant_id$", str(POLLUTANTS_CODES[i]))
+    if pollutant_codes is None:
+        pollutant_codes = POLLUTANTS_CODES
+
+    for pol_id in pollutant_codes:
+        url = URL_POLLUTANT_LIST.replace("$pollutant_id$", str(pol_id))
         url = url.replace("$country$", ('' if country is None else country))
-        url = url.replace("year_from$", str(year_from))
-        url = url.replace("year_to", str(year_to))
-        await txt_file_load_and_save(f'{str(POLLUTANTS_CODES[i])}.txt', save_path, url)
+        if station_per_pollutant is not None:
+            url = url.replace("$station$", ('' if station_per_pollutant[pol_id] is None
+                                            else station_per_pollutant[pol_id]))
+        elif station is not None and station != '':
+            url = url.replace("$station$", station)
+        url = url.replace("$city$", ('' if city is None else city))
+        url = url.replace("$year_from$", str(year_from))
+        url = url.replace("$year_to$", str(year_to))
+        await txt_file_load_and_save(f'{str(pol_id)}.txt', save_path, url)
     return save_path
 
 
