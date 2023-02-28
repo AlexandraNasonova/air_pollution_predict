@@ -1,14 +1,11 @@
 # roject specific files and folders
-aqreport_loader/data/*
-datasources/aq_NL_tot_11_2022/*
-datasources/industrial/*
+loaders/aqreport_loader/data/*
+loaders/data_weather/*
+datasources/aqi_calc/*
+datasources/aqi_enrich/*
+datasources/eda_cleanup_res/*
+datasources/pollutants_source/*
 datasources/weather/*
-datasources/aq_ne_all/*
-datasources/aq_min/*
-datasources/aqi_calc_old/*
-datasources/eda/*
-datasources/old/*
-
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
