@@ -7,6 +7,8 @@ datasources/eda_cleanup_res/*
 datasources/pollutants_source/*
 datasources/weather/*
 datasources/ds_joint/*
+predict/boosts/score.csv
+predict/boosts/score_1.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

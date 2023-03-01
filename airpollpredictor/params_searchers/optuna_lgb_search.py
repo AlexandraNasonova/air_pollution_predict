@@ -15,7 +15,6 @@ class OptunaLgbSearch:
     best_train_score: float
     best_val_score: float
     best_model: lgb.Booster
-    best_categorical_feature: []
     best_features_count: int
     best_features_list: []
 
@@ -43,11 +42,14 @@ class OptunaLgbSearch:
             self.default_params = default_params
         else:
             self.default_params = {}
+
         self.study_best_params = None
+        self.best_categorical_feature = None
         if default_top_features_count > 0:
             self.set_best_features_by_count(default_top_features_count)
         else:
             self.set_best_features_by_count(x_train.shape[0])
+
 
     def get_model_params_from_trial(self, trial):
         model_params = {
@@ -185,9 +187,20 @@ class OptunaLgbSearch:
             self.best_features_list = self.features_importance[0:self.best_features_count]
         return self.study.best_value
 
-    def run_model_and_eval(self, params, categorical_features, pruning_callback=None, best_features_only=False,
+    def run_model_and_eval(self, params=None, categorical_features=None, pruning_callback=None, best_features_only=False,
                            best_features_list=None, set_as_best_model=False) -> (
             float, float, lgb.Booster):
+
+        if params is None:
+            if self.study_best_params is None:
+                params = self.default_params
+            else:
+                params = self.study_best_params
+        if categorical_features is None:
+            if self.best_categorical_feature is None:
+                categorical_features = self.default_category
+            else:
+                categorical_features = self.best_categorical_feature
 
         if best_features_only:
             if best_features_list is None:
@@ -283,6 +296,7 @@ class OptunaLgbSearch:
         self.best_categorical_feature = categorical_features
         self.best_train_score = train_score
         self.best_val_score = val_score
+
 
     # def run_tuner_cv(self, cv_splitter, params=None, categorical_features=None, best_features_only=False,
     #                  num_boost_round=100, lgbm_early_stop_rounds=50, optuna_early_stop_rounds=30):
