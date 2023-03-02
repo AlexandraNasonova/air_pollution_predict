@@ -121,8 +121,10 @@ class StatTestWrapper:
             tab_vals_ind = 4
         print('The %s test statistic %f    pvalue: %.2f   maximal Lag: %i   %s: %s' %
               (test_name, result[0], result[1], result[2], tab_vals, result[tab_vals_ind]))
-        if (result[1] <= 0.05) & (((result[tab_vals_ind]['5%'] > result[0]) & (test_name == 'ADF'))
-                                  | ((result[tab_vals_ind]['5%'] < result[0]) & (test_name == 'KPSS'))):
+        if (((test_name == 'ADF') & (result[1] <= 0.05) & (result[tab_vals_ind]['5%'] > result[0]))
+            | ((test_name == 'KPSS') & (result[1] > 0.05)
+               #& (result[tab_vals_ind]['5%'] <= result[0])
+                )):
             print("\u001b[32m%s: stationary\u001b[0m" % test_name)
         else:
             print("\x1b[31m%s: non-stationary\x1b[0m" % test_name)
