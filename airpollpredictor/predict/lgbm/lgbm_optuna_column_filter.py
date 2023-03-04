@@ -1,7 +1,7 @@
 from enum import Enum
 import aqi_calculations.aqi_calculator as aqc
-import params_searchers.ts_splitter as ts_splitter
-from params_searchers.optuna_lgb_search import OptunaLgbSearch
+import ml_models_search.ts_splitter as ts_splitter
+from ml_models_search.params_searchers.optuna_lgb_search import OptunaLgbSearch
 import pandas as pd
 import re
 
