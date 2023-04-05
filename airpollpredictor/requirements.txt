@@ -1,0 +1,12 @@
+lightgbm
+optuna
+pmdarima
+dvc
+ipywidgets
+ipython
+joblib
+matplotlib
+numpy
+pandas
+requests
+pathspec
