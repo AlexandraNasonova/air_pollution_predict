@@ -1,27 +1,41 @@
+# pylint: disable=E0401, R0913, R0914
+"""Module for features calculation using aggregation by
+rolling windows and Exponential Moving Average"""
+
+from copy import deepcopy
+import warnings
 import numpy as np
 import pandas as pd
-from copy import deepcopy
 from IPython.core.display_functions import display
 from ipywidgets import IntProgress
-import warnings
 
 warnings.filterwarnings('ignore')
 
 
-def percentile(n):
-    """Calculate n - percentile of data"""
+def percentile(n_percent):
+    """
+    Calculate n - percentile of data"
+    @param n_percent: Percentile percent for calculation
+    @return: Percentile value
+    """
 
-    def percentile_(x):
-        return np.percentile(x, n)
+    def percentile_(values):
+        return np.percentile(values, n_percent)
 
-    percentile_.__name__ = 'pctl%s' % n
+    percentile_.__name__ = f'pctl{n_percent}'
     return percentile_
 
 
 # add missing dates to GroupBy.Core object
-def fill_missing_dates(x, date_col):
-    min_date, max_date = x[date_col].min(), x[date_col].max()
-    groupby_day = x.groupby(pd.PeriodIndex(x[date_col], freq='D'))
+def fill_missing_dates(df_source, date_col):
+    """
+    Add missing dates to GroupBy.Core object
+    @param df_source: Source dataframe
+    @param date_col: The name of the columns with dates
+    @return: Processed dataframe with fixed dates
+    """
+    min_date, max_date = df_source[date_col].min(), df_source[date_col].max()
+    groupby_day = df_source.groupby(pd.PeriodIndex(df_source[date_col], freq='D'))
     results = groupby_day.sum(min_count=1)
 
     idx = pd.period_range(min_date, max_date)
@@ -32,9 +46,18 @@ def fill_missing_dates(x, date_col):
     return results
 
 
-def calc_preag_fill(data, group_col, date_col, target_cols, preagg_method):
+def calc_preag_fill(df_source, group_col, date_col, target_cols, preagg_method):
+    """
+    Calculate aggregation functions for the columns from group_col list, except the first one.
+    @param df_source:  Source dataframe
+    @param group_col: Names of the columns for grouping
+    @param date_col: Name of the date column
+    @param target_cols: The names of the target columns
+    @param preagg_method: Function for preaggregation
+    @return: Dataframe with pre-aggregation
+    """
     # calc preaggregation
-    data_preag = data.groupby(group_col).agg(
+    data_preag = df_source.groupby(group_col).agg(
         preagg_method)[target_cols].reset_index()
 
     # fill missing dates
@@ -46,17 +69,35 @@ def calc_preag_fill(data, group_col, date_col, target_cols, preagg_method):
     return data_preag_filled
 
 
-def calc_rolling(data_preag_filled, group_col, date_col, method, w):
+def calc_rolling(data_preag_filled: pd.DataFrame, group_col: [], date_col: str,
+                 method, rolling_window: int):
+    """
+    Calculates Aggregate functions for rolling windows
+    @param data_preag_filled: Dataframe with aggregates
+    @param group_col: Names of the columns for grouping
+    @param date_col: Name of the date column
+    @param method: Aggregate function to be calculated
+    @param rolling_window: Rolling window
+    @return: Dataframe with aggregates calculated on rolling window
+    """
     # calc rolling stats
     lf_df_filled = data_preag_filled.groupby(group_col[:-1]). \
-        apply(lambda x: x.set_index(date_col).rolling(window=w, min_periods=1).agg(method)).drop(group_col[:-1], axis=1)
+        apply(lambda x: x.set_index(date_col).rolling(window=rolling_window, min_periods=1)
+              .agg(method)).drop(group_col[:-1], axis=1)
 
     # return DataFrame with rolled columns from target_vars
     return lf_df_filled
 
 
-def calc_ewm(data_preag_filled, group_col, date_col, span):
-    # calc ewm stats
+def calc_ewm(data_preag_filled: pd.DataFrame, group_col: [], date_col: str, span: float):
+    """
+    Calculates Exponential Moving Average for the data frame
+    @param data_preag_filled: Dataframe with aggregates
+    @param group_col: Names of the columns for grouping
+    @param date_col: Name of the date column
+    @param span: Span value for Exponential Moving Average calculation
+    @return: Dataframe with calculated Exponential Moving Average
+    """
     lf_df_filled = data_preag_filled.groupby(group_col[:-1]). \
         apply(lambda x: x.set_index(date_col).ewm(span=span).mean()).drop(group_col[:-1], axis=1)
 
@@ -64,7 +105,15 @@ def calc_ewm(data_preag_filled, group_col, date_col, span):
     return lf_df_filled
 
 
-def shift(lf_df_filled, group_col, date_col, lag):
+def shift(lf_df_filled: pd.DataFrame, group_col: [], date_col: str, lag: int):
+    """
+    Shifts the dataframe by lag days
+    @param lf_df_filled:
+    @param group_col: Names of the columns for grouping
+    @param date_col: Name of the date column
+    @param lag: Value of the lag to shift back
+    @return: Shifted by lag days dataframe
+    """
     lf_df = lf_df_filled.groupby(
         level=group_col[:-1]).apply(lambda x: x.shift(lag)).reset_index()
     lf_df[date_col] = pd.to_datetime(lf_df[date_col].astype(str))
@@ -101,8 +150,8 @@ def generate_lagged_features(
 
     data = data.sort_values(date_col)
     out_df = deepcopy(data)
-    # dates = [min(data[date_col]), max(data[date_col])]
-    total = len(dynamic_filters) * len(lags) * len(preagg_methods) * (len(ewm_params) + len(windows) * len(agg_methods))
+    total = len(dynamic_filters) * len(lags) * len(preagg_methods) \
+            * (len(ewm_params) + len(windows) * len(agg_methods))
     progress = IntProgress(min=0, max=total)
     display(progress)
 
@@ -122,25 +171,29 @@ def generate_lagged_features(
                 for alpha in ewm_params.get(filter_col, []):
                     ewm_filled = calc_ewm(data_preag_filled, group_col, date_col, alpha)
                     ewm = shift(ewm_filled, group_col, date_col, lag)
-                    new_names = {x: "{0}_lag{1}d_ewm{2}_{3}{4}{5}".format(x, lag, alpha, key_str,
-                                                                          preagg_str, filter_col_str)
-                                 for x in target_cols}
-                    out_df = pd.merge(out_df, ewm.rename(columns=new_names), how='left', on=group_col)
+                    new_names = \
+                        {x: f"{x}_lag{lag}d_ewm{alpha}_{key_str}{preagg_str}{filter_col_str}"
+                         for x in target_cols}
+                    out_df = pd.merge(out_df, ewm.rename(columns=new_names),
+                                      how='left', on=group_col)
                     progress.value += 1
 
                 # add rolling features
-                for w in windows.get(filter_col, []):
+                for window in windows.get(filter_col, []):
                     for method in agg_methods:
-                        rolling_filled = calc_rolling(data_preag_filled, group_col, date_col, method, w)
+                        rolling_filled = calc_rolling(data_preag_filled, group_col,
+                                                      date_col, method, window)
 
                         rolling = shift(rolling_filled, group_col, date_col, lag)
-                        method_name = method.__name__ if type(method) != str else method
+                        # method_name = method.__name__ if type(method) != str else method
+                        method_name = method.__name__ if method.isinstance(str) else method
 
-                        new_names = {x: "{0}_lag{1}d_win{2}_{3}{4}ag{5}_{6}".format(x, lag, w, key_str, preagg_str,
-                                                                                    method_name, filter_col_str)
-                                     for x in target_cols}
+                        new_name = f"lag{lag}d_win{window}_{key_str}"
+                        new_name += f"{preagg_str}ag{method_name}_{filter_col_str}"
+                        new_names = {x: f"{x}_{new_name}" for x in target_cols}
 
-                        out_df = pd.merge(out_df, rolling.rename(columns=new_names), how='left', on=group_col)
+                        out_df = pd.merge(out_df, rolling.rename(columns=new_names),
+                                          how='left', on=group_col)
                         progress.value += 1
 
     return out_df
