@@ -1,23 +1,40 @@
+"""Storage for AQI breakpoint information"""
+
+
 class BreakpointDto:
+    """Storage for AQI breakpoint information"""
 
-    def __init__(self, bp_ind: int, bp_lo: float, bp_hi: float, c: float):
-        self.__bp_ind = bp_ind
-        self.__bp_lo = bp_lo
-        self.__bp_hi = bp_hi
-        self.__c = c
-
-    @property
-    def bp_ind(self):
-        return self.__bp_ind
+    def __init__(self, breakpoint_ind: int, breakpoint_low: float,
+                 breakpoint_high: float, concentration: float):
+        self.__breakpoint_ind = breakpoint_ind
+        self.__breakpoint_low = breakpoint_low
+        self.__breakpoint_high = breakpoint_high
+        self.__concentration = concentration
 
     @property
-    def bp_lo(self):
-        return self.__bp_lo
+    def index(self) -> int:
+        """
+        Breakpoint index
+        """
+        return self.__breakpoint_ind
 
     @property
-    def bp_hi(self):
-        return self.__bp_hi
+    def low_border(self) -> float:
+        """
+        Breakpoint low border
+        """
+        return self.__breakpoint_low
 
     @property
-    def c(self):
-        return self.__c
+    def high_border(self) -> float:
+        """
+        Breakpoint high border
+        """
+        return self.__breakpoint_high
+
+    @property
+    def concentration(self) -> float:
+        """
+        Concentration of the pollutant
+        """
+        return self.__concentration
