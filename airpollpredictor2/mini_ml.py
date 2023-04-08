@@ -112,12 +112,15 @@ def model_predict(X_test_data, model_path, scaler_path='None') -> {Copy}:
     X_test['prediction'] = y_pred
     return X_test
 
+### Pipeline which uses separate train and test data
 def pipeline(trainfile, testfile, outputfile):
     # noinspection PyArgumentList
     linreg_model(xy_splitter(feature_creator_v1(ts_loader(trainfile))))
     predictions = model_predict(testfile, 'model.pkl', scaler_path='scaler.pkl')
     predictions.to_csv(outputfile, index=False, encoding='utf-8-sig')
+    return
 
+### Pipeline dividing provided single data into train and test
 def pipeline_v2(trainfile, train_splitby, outputfile):
     # noinspection PyArgumentList
     X_train, X_test, y_train, _ = xy_splitter_v2(train_test_splitter(feature_creator_v1(ts_loader(trainfile)), splitby=train_splitby))

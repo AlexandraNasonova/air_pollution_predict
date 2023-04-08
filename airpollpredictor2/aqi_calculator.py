@@ -9,6 +9,15 @@ pol_dict = {7: "O3", 6001: "PM2.5", 5: "PM10", 10: "CO", 1: "SO2", 8: "NO2"}
 pol_dict_rev ={'SO2': 1,'PM10': 5,'O3': 7,'NO2': 8,'CO': 10,'PM2.5': 6001}
 pol_units = {1:'µg/m3',5:'µg/m3',7:'µg/m3',8:'µg/m3',10:'mg/m3',6001:'µg/m3'}
 
+
+### Code to choose station with most measurements
+def station_picker(df):
+    station = df.groupby('AirQualityStation')['Concentration'].count().reset_index() \
+        .sort_values(by='Concentration', ascending=False).head(1).reset_index()['AirQualityStation'][0]
+    df_v1 = df[df['AirQualityStation'] == station].copy()
+    df_v1['DatetimeEnd'] = pd.to_datetime(df_v1['DatetimeEnd'], format="%Y-%m-%d %H:%M:%S")
+    return df_v1
+
 ### Code to convert data into hourly timeseries format
 def create_timeseries(df):
     df_mean_list = list()
@@ -85,19 +94,16 @@ def aqi(df):
     df = rounder(filler(grouper(combiner(calculator(roller(converter(df)))))))
     return df
 
-
 def main() -> None:
-    df = pd.read_csv('denmark_v5.csv', low_memory=False)
-    df = df.drop_duplicates(['AirQualityStation','AirPollutant','DatetimeEnd'], keep='last')
-    station = df.groupby('AirQualityStation')['Concentration'].count().reset_index()\
-        .sort_values(by='Concentration', ascending=False).head(1).reset_index()['AirQualityStation'][0]
-    df_v1 = df[df['AirQualityStation']==station].copy()
-    df_v1['DatetimeEnd'] = pd.to_datetime(df_v1['DatetimeEnd'], format="%Y-%m-%d %H:%M:%S")
-    df_ts = create_timeseries(df_v1)
-    ts_aqi = aqi(df_ts)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--inputfile", type=str, required=True, help="path to input data")
+    parser.add_argument("--outputfile", type=str, required=True, help="path to output data")
+    args = parser.parse_args()
+    df1 = pd.read_csv(args.inputfile, low_memory=False)
+    ts_aqi = aqi(create_timeseries(station_picker(df1)))
     ts_aqi2 = ts_aqi.copy().reset_index()
     os.chdir(os.getcwd())
-    ts_aqi2.to_csv( "ts_final.csv", index=False, encoding='utf-8-sig')
+    ts_aqi2.to_csv(args.outputfile, index=False, encoding='utf-8-sig')
 
 if __name__ == "__main__":
     main()
