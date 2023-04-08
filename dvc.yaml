@@ -1,0 +1,84 @@
+stages:
+  download-weather:
+    cmd: python airpollpredictor/download_weather.py --service_url http://127.0.0.1:8041 --params params.yaml
+    deps:
+      - airpollpredictor/download_weather.py
+    params:
+      - download-weather
+    outs:
+      - airpollpredictor/datasets/weather-source-data/weather.csv
+    
+  download-pollutants:
+    cmd: python airpollpredictor/download_pollutants.py --service_url http://127.0.0.1:8040 --params params.yaml
+    deps:
+      - airpollpredictor/download_pollutants.py
+    params:
+      - download-pollutants
+    outs:
+      - airpollpredictor/datasets/pollutants-source-data/urls/5.txt
+      - airpollpredictor/datasets/pollutants-source-data/urls/7.txt
+      - airpollpredictor/datasets/pollutants-source-data/urls/8.txt
+      - airpollpredictor/datasets/pollutants-source-data/urls/6001.txt
+      - airpollpredictor/datasets/pollutants-source-data/5/NL_5_28280_2023_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/7/NL_7_28284_2023_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/8/NL_8_28398_2023_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/6001/NL_6001_28131_2023_timeseries.csv
+    
+  clean-pollutants:
+    cmd: python airpollpredictor/clean_pollutants.py --input_folder airpollpredictor/datasets/pollutants-source-data/ --output_folder airpollpredictor/datasets/pollutants-clean-data/ --params params.yaml
+    deps:
+      - airpollpredictor/datasets/pollutants-source-data/5/NL_5_28280_2023_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/7/NL_7_28284_2023_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/8/NL_8_28398_2023_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/6001/NL_6001_28131_2023_timeseries.csv
+
+      - airpollpredictor/clean_pollutants.py
+    params:
+      - pollutants-codes
+    outs:
+      - airpollpredictor/datasets/pollutants-clean-data/5.csv
+      - airpollpredictor/datasets/pollutants-clean-data/7.csv
+      - airpollpredictor/datasets/pollutants-clean-data/8.csv
+      - airpollpredictor/datasets/pollutants-clean-data/6001.csv
+     
+  calculate-aqi:
+    cmd: python airpollpredictor/calculate_aqi.py --input_folder airpollpredictor/datasets/pollutants-clean-data/ --output_folder airpollpredictor/datasets/pollutants-aqi-data/ --params params.yaml
+    deps:
+      - airpollpredictor/datasets/pollutants-clean-data/5.csv
+      - airpollpredictor/datasets/pollutants-clean-data/7.csv
+      - airpollpredictor/datasets/pollutants-clean-data/8.csv
+      - airpollpredictor/datasets/pollutants-clean-data/6001.csv
+
+      - airpollpredictor/calculate_aqi.py
+    params:
+      - pollutants-codes
+    outs:
+      - airpollpredictor/datasets/pollutants-aqi-data/5.csv
+      - airpollpredictor/datasets/pollutants-aqi-data/7.csv
+      - airpollpredictor/datasets/pollutants-aqi-data/8.csv
+      - airpollpredictor/datasets/pollutants-aqi-data/6001.csv
+
+  enrich-pollutants:
+    cmd: python airpollpredictor/enrich_pollutants.py --input_folder airpollpredictor/datasets/pollutants-clean-data/ --output_file airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv --params params.yaml
+    deps:
+      - airpollpredictor/datasets/pollutants-clean-data/5.csv
+      - airpollpredictor/datasets/pollutants-clean-data/7.csv
+      - airpollpredictor/datasets/pollutants-clean-data/8.csv
+      - airpollpredictor/datasets/pollutants-clean-data/6001.csv
+      - airpollpredictor/enrich_pollutants.py
+    params:
+      - pollutants-codes
+      - period-settings
+      - enrich-pollutants
+    outs:
+      - airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv
+
+#  clean-weather:
+#    cmd: python airpollpredictor/clean_weather.py --input_folder airpollpredictor/datasets/weather-source-data/ --output_folder airpollpredictor/datasets/weather-clean-data/ --params params.yaml
+#    deps:
+#      - airpollpredictor/datasets/weather-source-data/weather.csv
+#      - airpollpredictor/clean_weather.py
+#    params:
+#      - weather-features
+#    outs:
+#      - airpollpredictor/datasets/weather-clean-data/weather.csv

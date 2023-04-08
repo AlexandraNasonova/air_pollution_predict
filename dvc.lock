@@ -1,0 +1,269 @@
+schema: '2.0'
+stages:
+  download-pollutants:
+    cmd: python airpollpredictor/download_pollutants.py --service_url http://127.0.0.1:8040
+      --params params.yaml
+    deps:
+    - path: airpollpredictor/download_pollutants.py
+      md5: bc883852bd1f8d417b933618292c72a7
+      size: 481
+    params:
+      params.yaml:
+        download-pollutants:
+          end_point_current_year: download_current_year
+          request_params_current_year:
+            load_params:
+              save_dir_path: datasets/pollutants-source-data/
+              country_code: NL
+              city: Rotterdam
+              stations_per_pollutants:
+                '7': STA-NL00418
+                '5': STA-NL00418
+                '6001': STA-NL00448
+                '8': STA-NL00418
+    outs:
+    - path: airpollpredictor/datasets/pollutants-source-data/5/NL_5_28280_2023_timeseries.csv
+      md5: 46959ffd3e9369956b58827e06fd3b71
+      size: 546361
+    - path: airpollpredictor/datasets/pollutants-source-data/6001/NL_6001_28131_2023_timeseries.csv
+      md5: 1c24fd34cee2061b86cdee08795cb863
+      size: 551454
+    - path: airpollpredictor/datasets/pollutants-source-data/7/NL_7_28284_2023_timeseries.csv
+      md5: 7a59441cb898cc490bc6e2b29c74a51a
+      size: 539002
+    - path: airpollpredictor/datasets/pollutants-source-data/8/NL_8_28398_2023_timeseries.csv
+      md5: f87820dc5024bbd4fa09f0d4f385a233
+      size: 542870
+    - path: airpollpredictor/datasets/pollutants-source-data/urls/5.txt
+      md5: 8f8e8a8b01a41abb25f5672f6e5c5e1d
+      size: 95
+    - path: airpollpredictor/datasets/pollutants-source-data/urls/6001.txt
+      md5: f5a8934d7d89adf6c676bcdc3b25cf00
+      size: 98
+    - path: airpollpredictor/datasets/pollutants-source-data/urls/7.txt
+      md5: 4e6417d315785f1c699c8810182c97af
+      size: 95
+    - path: airpollpredictor/datasets/pollutants-source-data/urls/8.txt
+      md5: 94c2961eec0573b618ed2e0eeb335cd4
+      size: 95
+  download-weather:
+    cmd: python airpollpredictor/download_weather.py --service_url http://127.0.0.1:8041
+      --params params.yaml
+    deps:
+    - path: airpollpredictor/download_weather.py
+      md5: 216742780a937a6917381eae1406d51d
+      size: 487
+    params:
+      params.yaml:
+        download-weather:
+          end_point_current_year: download_current_year
+          request_params_current_year:
+            load_params:
+              save_file_path: datasets/weather-source-data/weather.csv
+              station_id: '06344'
+    outs:
+    - path: airpollpredictor/datasets/weather-source-data/weather.csv
+      md5: 458a59e8a9bcd2b148b1c758dcd07c26
+      size: 5152
+  clean-pollutants:
+    cmd: python airpollpredictor/clean_pollutants.py --input_folder airpollpredictor/datasets/pollutants-source-data/
+      --output_folder airpollpredictor/datasets/pollutants-clean-data/ --params params.yaml
+    deps:
+    - path: airpollpredictor/clean_pollutants.py
+      md5: 6588a292a1719b0b51339b5848753726
+      size: 1687
+    - path: airpollpredictor/datasets/pollutants-source-data/5/NL_5_28280_2023_timeseries.csv
+      md5: 46959ffd3e9369956b58827e06fd3b71
+      size: 546361
+    - path: airpollpredictor/datasets/pollutants-source-data/6001/NL_6001_28131_2023_timeseries.csv
+      md5: 1c24fd34cee2061b86cdee08795cb863
+      size: 551454
+    - path: airpollpredictor/datasets/pollutants-source-data/7/NL_7_28284_2023_timeseries.csv
+      md5: 7a59441cb898cc490bc6e2b29c74a51a
+      size: 539002
+    - path: airpollpredictor/datasets/pollutants-source-data/8/NL_8_28398_2023_timeseries.csv
+      md5: f87820dc5024bbd4fa09f0d4f385a233
+      size: 542870
+    params:
+      params.yaml:
+        pollutants-codes:
+        - 7
+        - 6001
+        - 5
+        - 8
+    outs:
+    - path: airpollpredictor/datasets/pollutants-clean-data/5.csv
+      md5: 4b863dcea13a3f4fa5cc41a41ec2acb7
+      size: 64635
+    - path: airpollpredictor/datasets/pollutants-clean-data/6001.csv
+      md5: a34e655c51fa4c09dc934deb426b82ac
+      size: 67212
+    - path: airpollpredictor/datasets/pollutants-clean-data/7.csv
+      md5: f5be64cae0f587328c9545b53bc7201b
+      size: 65924
+    - path: airpollpredictor/datasets/pollutants-clean-data/8.csv
+      md5: 94241d509ef6d6fe105000034b533780
+      size: 66369
+  calculate-aqi:
+    cmd: python airpollpredictor/calculate_aqi.py --input_folder airpollpredictor/datasets/pollutants-clean-data/
+      --output_folder airpollpredictor/datasets/pollutants-aqi-data/ --params params.yaml
+    deps:
+    - path: airpollpredictor/calculate_aqi.py
+      md5: 7c8accf8bd84c7983a895e5556b66030
+      size: 1228
+    - path: airpollpredictor/datasets/pollutants-clean-data/5.csv
+      md5: 4b863dcea13a3f4fa5cc41a41ec2acb7
+      size: 64635
+    - path: airpollpredictor/datasets/pollutants-clean-data/6001.csv
+      md5: a34e655c51fa4c09dc934deb426b82ac
+      size: 67212
+    - path: airpollpredictor/datasets/pollutants-clean-data/7.csv
+      md5: f5be64cae0f587328c9545b53bc7201b
+      size: 65924
+    - path: airpollpredictor/datasets/pollutants-clean-data/8.csv
+      md5: 94241d509ef6d6fe105000034b533780
+      size: 66369
+    params:
+      params.yaml:
+        pollutants-codes:
+        - 7
+        - 6001
+        - 5
+        - 8
+    outs:
+    - path: airpollpredictor/datasets/pollutants-aqi-data/5.csv
+      md5: 8ee19b52de231109408a0b8059318bc6
+      size: 2816
+    - path: airpollpredictor/datasets/pollutants-aqi-data/6001.csv
+      md5: 9527ba94b6640aa710e1ede5f8ab3366
+      size: 2831
+    - path: airpollpredictor/datasets/pollutants-aqi-data/7.csv
+      md5: 8052dbfc74acd5aa9c7521bd207ee9f7
+      size: 2819
+    - path: airpollpredictor/datasets/pollutants-aqi-data/8.csv
+      md5: 76ead65667a52609adfb2fd093b2c6c3
+      size: 2820
+  enrich-pollutants:
+    cmd: python airpollpredictor/enrich_pollutants.py --input_folder airpollpredictor/datasets/pollutants-clean-data/
+      --output_file airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv
+      --params params.yaml
+    deps:
+    - path: airpollpredictor/datasets/pollutants-clean-data/5.csv
+      md5: 4b863dcea13a3f4fa5cc41a41ec2acb7
+      size: 64635
+    - path: airpollpredictor/datasets/pollutants-clean-data/6001.csv
+      md5: a34e655c51fa4c09dc934deb426b82ac
+      size: 67212
+    - path: airpollpredictor/datasets/pollutants-clean-data/7.csv
+      md5: f5be64cae0f587328c9545b53bc7201b
+      size: 65924
+    - path: airpollpredictor/datasets/pollutants-clean-data/8.csv
+      md5: 94241d509ef6d6fe105000034b533780
+      size: 66369
+    - path: airpollpredictor/enrich_pollutants.py
+      md5: 715f4fb00e92a677396f3611563b206d
+      size: 2276
+    params:
+      params.yaml:
+        enrich-pollutants:
+          lags-shifts:
+          - 7
+          - 10
+          - 12
+          - 14
+          - 21
+          - 28
+          filters:
+          - weekday
+          - month
+          windows_filters_aqi:
+            NoFilter:
+            - 3D
+            - 5D
+            - 7D
+            - 14D
+            - 28D
+            weekday:
+            - 28D
+            - 56D
+            month:
+            - 90D
+          lag_agg_aqi:
+          - 7
+          - 10
+          - 14
+          - 21
+          - 28
+          methods_agg_aqi:
+          - mean
+          - median
+          - percentile(10)
+          - percentile(90)
+          ewm_filters_aqi:
+            NoFilter:
+            - 7
+            - 14
+            - 21
+            - 28
+            weekday:
+            - 28
+            - 56
+            month:
+            - 90
+        period-settings:
+          year_start_train: 2023
+          forecast_period: 7
+        pollutants-codes:
+        - 7
+        - 6001
+        - 5
+        - 8
+    outs:
+    - path: airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv
+      md5: 64ace299a044d4c7ec6d59e294da39d8
+      size: 827123
+  clean-weather:
+    cmd: python airpollpredictor/clean_weather.py --input_file airpollpredictor/datasets/weather-source-data/weather.csv
+      --output_file airpollpredictor/datasets/weather-clean-data/weather.csv --params
+      params.yaml
+    deps:
+    - path: airpollpredictor/clean_weather.py
+      md5: 279e89be8d5c1ec1e0e067b724513ec3
+      size: 1026
+    - path: airpollpredictor/datasets/weather-source-data/weather.csv
+      md5: 458a59e8a9bcd2b148b1c758dcd07c26
+      size: 5152
+    params:
+      params.yaml:
+        weather-features:
+        - tavg
+        - tmin
+        - tmax
+        - prcp
+        - wdir
+        - wspd
+        - wpgt
+        - pres
+    outs:
+    - path: airpollpredictor/datasets/weather-clean-data/weather.csv
+      md5: 4d7d461987f571e02850eaf93276e0c9
+      size: 4946
+  merge_enriched_weather:
+    cmd: python airpollpredictor/merge_enriched_weather.py --input_weather_file airpollpredictor/datasets/weather-clean-data/weather.csv
+      --input_aqi_file airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv
+      --output_file airpollpredictor/datasets/pollutants-weather-merged-data/aqi_all.csv
+      --params params.yaml
+    deps:
+    - path: airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv
+      md5: 64ace299a044d4c7ec6d59e294da39d8
+      size: 827123
+    - path: airpollpredictor/datasets/weather-clean-data/weather.csv
+      md5: 4d7d461987f571e02850eaf93276e0c9
+      size: 4946
+    - path: airpollpredictor/merge_enriched_weather.py
+      md5: 2b0ecfdc816b796e4b21976c83f5adbb
+      size: 1164
+    outs:
+    - path: airpollpredictor/datasets/pollutants-weather-merged-data/aqi_all.csv
+      md5: 2bba4d18db0740447177ff08179dcc47
+      size: 813559

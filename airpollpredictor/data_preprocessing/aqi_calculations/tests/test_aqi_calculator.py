@@ -5,7 +5,7 @@ Unit tests for AQI calculations
 """
 import unittest
 import pandas as pd
-import aqi_calculations.aqi_calculator as aqc
+import dvc_pipeline.data_preprocessing.aqi_calculations.aqi_calculator as aqc
 
 
 class AqiCalculatorTestCase(unittest.TestCase):

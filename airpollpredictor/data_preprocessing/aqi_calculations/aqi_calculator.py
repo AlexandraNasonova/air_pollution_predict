@@ -1,11 +1,11 @@
-"""Module for calculating AQI by concentrations of pollutant."""
 # pylint: disable=E0401
+"""Module for calculating AQI by concentrations of pollutant."""
 
 
 import pandas as pd
-import aqi_calculations.aqi_dto as aqd
-import aqi_calculations.pollutant_dto as pld
-import aqi_calculations.breakpoint_dto as bpd
+from . import aqi_dto as aqd
+from . import pollutant_dto as pld
+from . import breakpoint_dto as bpd
 
 _BREAKPOINTS_COUNT = 7
 

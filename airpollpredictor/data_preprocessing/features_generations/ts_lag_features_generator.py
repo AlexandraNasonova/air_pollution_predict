@@ -6,8 +6,8 @@ from copy import deepcopy
 import warnings
 import numpy as np
 import pandas as pd
-from IPython.core.display_functions import display
-from ipywidgets import IntProgress
+# from IPython.core.display_functions import display
+# from ipywidgets import IntProgress
 
 warnings.filterwarnings('ignore')
 
@@ -152,8 +152,8 @@ def generate_lagged_features(
     out_df = deepcopy(data)
     total = len(dynamic_filters) * len(lags) * len(preagg_methods) \
             * (len(ewm_params) + len(windows) * len(agg_methods))
-    progress = IntProgress(min=0, max=total)
-    display(progress)
+    # progress = IntProgress(min=0, max=total)
+    # display(progress)
 
     preagg_methods_count = len(preagg_methods)
     filter_count = len(dynamic_filters)
@@ -176,7 +176,7 @@ def generate_lagged_features(
                          for x in target_cols}
                     out_df = pd.merge(out_df, ewm.rename(columns=new_names),
                                       how='left', on=group_col)
-                    progress.value += 1
+                    # progress.value += 1
 
                 # add rolling features
                 for window in windows.get(filter_col, []):
@@ -194,6 +194,6 @@ def generate_lagged_features(
 
                         out_df = pd.merge(out_df, rolling.rename(columns=new_names),
                                           how='left', on=group_col)
-                        progress.value += 1
+                        # progress.value += 1
 
     return out_df

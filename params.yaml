@@ -1,0 +1,87 @@
+pollutants-codes:
+  - 7
+  - 6001
+  - 5
+  - 8
+
+weather-features:
+  - tavg
+  - tmin
+  - tmax
+  - prcp
+  - wdir
+  - wspd
+  - wpgt
+  - pres
+
+period-settings:
+  year_start_train: 2023
+  forecast_period: 7
+
+
+download-weather:
+  end_point_current_year: download_current_year
+  request_params_current_year:
+    load_params:
+      save_file_path: datasets/weather-source-data/weather.csv
+      station_id: '06344'
+      
+download-pollutants:
+  end_point_current_year: download_current_year
+  request_params_current_year:
+    load_params:
+      save_dir_path: datasets/pollutants-source-data/
+      country_code: NL
+      city: Rotterdam
+      stations_per_pollutants: 
+        '7': 'STA-NL00418' 
+        '5': 'STA-NL00418' 
+        '6001': 'STA-NL00448' 
+        '8': 'STA-NL00418'
+  
+enrich-pollutants:
+  lags-shifts:
+    - 7
+    - 10
+    - 12
+    - 14
+    - 21
+    - 28
+  filters:
+    - weekday
+    - month
+  windows_filters_aqi:
+    NoFilter:
+      - 3D
+      - 5D
+      - 7D
+      - 14D
+      - 28D
+    weekday:
+      - 28D
+      - 56D
+    month:
+      - 90D
+  lag_agg_aqi:
+    - 7
+    - 10
+    - 14
+    - 21
+    - 28
+  methods_agg_aqi:
+    - mean
+    - median
+    - percentile(10)
+    - percentile(90)
+
+  ewm_filters_aqi:
+    NoFilter:
+      - 7
+      - 14
+      - 21
+      - 28
+    weekday:
+      - 28
+      - 56
+    month:
+      - 90

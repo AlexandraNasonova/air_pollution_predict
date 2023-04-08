@@ -5,10 +5,11 @@ Async loader of historical data about weather in .json format via meteostat API
 """
 
 import datetime
+import os
+
 import requests
 import pandas as pd
-from loaders.logger import log_error
-from loaders.file_saver import create_local_data_dir, save_csv_file_from_dataframe
+from data_loading.logger import log_error
 
 URL_DAILY_HIST = "https://meteostat.p.rapidapi.com/stations/daily"
 RAPID_API_KEY = '636601abdamsheec399674665a87p1878bfjsnf16635dcc483'
@@ -30,27 +31,30 @@ async def __get(station: str, date_from, date_end):
     )
 
 
-async def load_weather_history_from_station(station: str, date_from: datetime.date,
+async def load_weather_history_from_station(save_dir_path: str,
+                                            station: str,
+                                            date_from: datetime.date,
                                             date_end=datetime.datetime.now().date()) -> str:
     """
     Downloads historical weather data via Meteostat API
+    @param save_dir_path: Path to folder to save weather data
     @param station: The code of the station
     @param date_from: The first date of the historical period
     @param date_end: The last date of the historical period
     @return: The path to saved .csv file with historical weather data
     """
-    save_path = create_local_data_dir("data_weather")
-    print(f"Directory {save_path} created")
+    # save_path = create_local_data_dir("data_weather")
+    # print(f"Directory {save_path} created")
     response = await __get(station, date_from, date_end)
     if response.status_code != 200:
         print(response.url)
-        log_error(save_path, text=response.text, error_reason=response.reason,
+        log_error(save_dir_path, text=response.text, error_reason=response.reason,
                   station=station, date_from=date_from, date_end=date_end, url=response.url)
         raise ConnectionError()
 
     df_result = __convert_json_to_pandas(response.json())
-    await save_csv_file_from_dataframe(save_path, file_name=f'{station}.csv', df_to_save=df_result)
-    return save_path
+    __save_csv(save_dir_path, file_name=f'{station}.csv', df_to_save=df_result)
+    return save_dir_path
 
 
 def __convert_json_to_pandas(response_json) -> pd.DataFrame:
@@ -60,3 +64,8 @@ def __convert_json_to_pandas(response_json) -> pd.DataFrame:
     df_weather['date'] = pd.to_datetime(df_weather['date'], format='%Y-%m-%d')
     df_weather.set_index('date', inplace=True)
     return df_weather
+
+
+def __save_csv(save_path: str, file_name: str, df_to_save: pd.DataFrame):
+    file_path = os.path.join(save_path, f'{file_name}')
+    df_to_save.to_csv(file_path)
