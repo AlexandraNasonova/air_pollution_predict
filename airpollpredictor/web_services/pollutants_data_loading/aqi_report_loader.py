@@ -10,7 +10,7 @@ import os
 import pathlib
 import time
 import requests
-from data_loading.logger import log_error
+from web_services.logger import log_error
 
 URL_POLLUTANT_LIST = "https://fme.discomap.eea.europa.eu/fmedatastreaming/AirQualityDownload/" \
                      "AQData_Extract.fmw?CountryCode=$country$&CityName=$city$&Pollutant=" \

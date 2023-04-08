@@ -10,7 +10,7 @@ POL_NAMES_REVERSE = {"O3": 7, "PM25": 6001, "PM10": 5, "NO2": 8}
 POL_MEASURES = {7: "µg/m3", 6001: "µg/m3", 5: "µg/m3", 10: "mg/m3", 1: "µg/m3", 8: "µg/m3"}
 
 
-
+DATE_WEATHER_COLUMN_NAME = 'date'
 
 
 # NO_FILTER = 'NoFilter'

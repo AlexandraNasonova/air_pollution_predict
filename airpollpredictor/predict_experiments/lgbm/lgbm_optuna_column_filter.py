@@ -126,23 +126,23 @@ def init_optuna(df_timeseries: pd.DataFrame, pol_id: int,
     @param test_start_dt: The first date of the test dataset
     @param test_end_dt: The last date of the train dataset
     @param use_aqi_cols: The flag if the AQI columns should be included to
-    the features datasets
+    the features datasets_tests
     @param use_c_mean_cols: The flag if the Mean Concentration columns should be
-    included to the features datasets
+    included to the features datasets_tests
     @param use_lag_cols: The flag if the Lag columns should be included to
-    the features datasets
+    the features datasets_tests
     @param use_gen_lags_cols: The flag if the Aggregated Lag columns should
-    be included to the features datasets
+    be included to the features datasets_tests
     @param use_weather_cols: The flag if the Weather columns should
-    be included to the features datasets
+    be included to the features datasets_tests
     @param use_c_median_cols: The flag if the Median Concentration columns should be included to
-    the features datasets
+    the features datasets_tests
     @param use_c_max_cols: The flag if the Max Concentration columns should be included to
-    the features datasets
+    the features datasets_tests
     @param use_c_min_cols: The flag if the Min Concentration columns should be included to
-    the features datasets
+    the features datasets_tests
     @param use_pol_cols: The flag if the Pollutant columns should be included to
-    the features datasets (!not tested yet)
+    the features datasets_tests (!not tested yet)
     @param default_params: The default model params (optional)
     @param default_category: The default set of categories (optional)
     @param categories_for_optimization: The list of sets of categories for

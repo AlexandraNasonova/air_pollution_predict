@@ -12,17 +12,36 @@ NO_FILTER = 'NoFilter'
 ID_COLS = []
 
 
-def add_date_info(df_aqi_mean: pd.DataFrame):
+def generate_features(source_data_path: str,
+                      output_file: str,
+                      pollutants_codes: list[int],
+                      date_from: str,
+                      date_end: str,
+                      lags_shift: list[int],
+                      filters_aqi: list[str],
+                      windows_filters_aqi: dict,
+                      methods_agg_aqi: list[str],
+                      lags_agg_aqi: list[int],
+                      ewm_filters_aqi: dict):
+    df_aqi_mean = calc_aqi_and_mean_concentration_and_merge(
+        source_data_path=source_data_path, pollutants_codes=pollutants_codes,
+        date_from=date_from, date_end=date_end)
     df_aqi_mean = date_gen.add_date_info(df_aqi_mean)
-    return df_aqi_mean
+    df_aqi_mean_lags = get_all_lag_data(
+        pollutants_codes=pollutants_codes, df_gen=df_aqi_mean, lags_shift=lags_shift,
+        filters_aqi=filters_aqi, windows_filters_aqi=windows_filters_aqi,
+        methods_agg_aqi=methods_agg_aqi, lags_agg_aqi=lags_agg_aqi,
+        ewm_filters_aqi=ewm_filters_aqi)
+    # __fix_column_names(df_aqi_mean_lags)
+    __save_calc(df_aqi_mean_lags, output_file)
 
 
-def fix_column_names(df_aqi_mean_lags: pd.DataFrame):
-    df_aqi_mean_lags.rename(
-        columns=lambda x: re.sub(r'[^A-Za-z0-9_]+', '', x), inplace=True)
+# def __fix_column_names(df_aqi_mean_lags: pd.DataFrame):
+#     df_aqi_mean_lags.rename(
+#         columns=lambda x: re.sub(r'[^A-Za-z0-9_]+', '', x), inplace=True)
 
 
-def save_calc(df: pd.DataFrame, output_file: str):
+def __save_calc(df: pd.DataFrame, output_file: str):
     df.to_csv(output_file)
 
 
@@ -178,7 +197,7 @@ def get_all_lag_data(pollutants_codes: list[int],
     df_gen_shift = __get_lag_data_shift(pollutants_codes=pollutants_codes,
                                         df_gen=df_gen,
                                         lags=lags_shift)
-    df_gen[NO_FILTER] = 1
+    df_gen_shift[NO_FILTER] = 1
     df_gen_shift = __get_lag_data_aqi(pollutants_codes=pollutants_codes,
                                       df_gen=df_gen_shift,
                                       id_cols=ID_COLS,

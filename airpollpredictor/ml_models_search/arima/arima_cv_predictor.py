@@ -1,7 +1,7 @@
 # pylint: disable=E0401, R0913, R0914, W0703
 
 """
-Contains methods for cross-validate and fit/predict SARIMAX models on dataframes
+Contains methods for cross-validate and fit/predict_experiments SARIMAX models on dataframes
 time series with time series
 """
 from typing import Optional
@@ -56,7 +56,7 @@ def predict_sarimax_calc_rmse(ts_train: pd.DataFrame,
                               exog_train: Optional[pd.DataFrame],
                               exog_val: Optional[pd.DataFrame]) -> (float, []):
     """
-    Fit SARIMAX model, predict on validation dataframe and calculate RMSE mean metric
+    Fit SARIMAX model, predict_experiments on validation dataframe and calculate RMSE mean metric
     @param ts_train: Dataframe for training
     @param ts_val: Dataframe for validation
     @param order: (p, d, q) ARIMA params

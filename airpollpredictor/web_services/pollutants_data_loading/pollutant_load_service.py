@@ -1,29 +1,31 @@
 import asyncio
 import datetime
+import os
+
 from fastapi import FastAPI
 from pydantic import BaseModel, validator
-import loaders.aqreport_loader.loader as aqi_loader
+from . import aqi_report_loader
 
 app = FastAPI()
 
 
 class AqiLoadParams(BaseModel):
+    save_dir_path: str
     year_from_train: int | None = 2015
-    pollutants_codes: list[int]
     country_code: str
     city: str | None = None
     stations_per_pollutants: dict[int, str]
-
-    @validator('pollutants_codes')
-    def pollutants_codes_must_have_value(cls, v: list[int]):
-        if v is None or len(v) == 0:
-            raise ValueError('pollutants_codes must have values')
-        return v
 
     @validator('country_code')
     def country_code_must_have_value(cls, v: str):
         if v is None or len(v.strip()) == 0:
             raise ValueError('country_code must have value')
+        return v
+
+    @validator('save_dir_path')
+    def save_dir_path_must_have_value(cls, v: str):
+        if v is None or len(v.strip()) == 0:
+            raise ValueError('save_dir_path must have value')
         return v
 
     @validator('stations_per_pollutants')
@@ -34,30 +36,39 @@ class AqiLoadParams(BaseModel):
 
 
 @app.post("/download_prev_years")
-def download_prev_years(save_dir_path: str, load_params: AqiLoadParams):
+def download_prev_years(load_params: AqiLoadParams):
     urls_path = asyncio.run(
-        aqi_loader.pollutants_txt_lists_load(save_dir_path=save_dir_path,
-                                             year_from=load_params.year_from_train,
-                                             year_to=datetime.datetime.now().year-1,
-                                             pollutant_codes=load_params.pollutants_codes,
-                                             country=load_params.country_code,
-                                             city=load_params.city,
-                                             station_per_pollutant=load_params.stations_per_pollutants))
-    asyncio.run(aqi_loader.csv_list_load(save_dir_path, urls_path))
+        aqi_report_loader.pollutants_txt_lists_load(
+            save_dir_path=load_params.save_dir_path,
+            year_from=load_params.year_from_train,
+            year_to=datetime.datetime.now().year - 1,
+            pollutant_codes=list(load_params.stations_per_pollutants.keys()),
+            country=load_params.country_code,
+            city=load_params.city,
+            station_per_pollutant=load_params.stations_per_pollutants))
+    asyncio.run(aqi_report_loader.csv_list_load(load_params.save_dir_path, urls_path))
 
 
 @app.post("/download_current_year")
-def download_current_year(save_dir_path, load_params: AqiLoadParams):
+def download_current_year(load_params: AqiLoadParams):
     urls_path = asyncio.run(
-        aqi_loader.pollutants_txt_lists_load(save_dir_path=save_dir_path,
-                                             year_from=datetime.datetime.now().year,
-                                             year_to=datetime.datetime.now().year,
-                                             pollutant_codes=load_params.pollutants_codes,
-                                             country=load_params.country_code,
-                                             city=load_params.city,
-                                             station_per_pollutant=load_params.stations_per_pollutants))
+        aqi_report_loader.pollutants_txt_lists_load(
+            save_dir_path=load_params.save_dir_path,
+            year_from=datetime.datetime.now().year,
+            year_to=datetime.datetime.now().year,
+            pollutant_codes=list(load_params.stations_per_pollutants.keys()),
+            country=load_params.country_code,
+            city=load_params.city,
+            station_per_pollutant=load_params.stations_per_pollutants))
 
-    asyncio.run(aqi_loader.csv_list_load(save_dir_path, urls_path))
+    asyncio.run(aqi_report_loader.csv_list_load(load_params.save_dir_path, urls_path))
+
+
+@app.post("/test")
+def test(save_dir_path: str, a: str):
+    file_path = os.path.join(save_dir_path, 'test.txt')
+    with open(file_path, 'w', encoding='UTF8') as file_stream:
+        file_stream.write(a)
 
 
 """

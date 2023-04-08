@@ -73,12 +73,21 @@ stages:
     outs:
       - airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv
 
-#  clean-weather:
-#    cmd: python airpollpredictor/clean_weather.py --input_folder airpollpredictor/datasets/weather-source-data/ --output_folder airpollpredictor/datasets/weather-clean-data/ --params params.yaml
-#    deps:
-#      - airpollpredictor/datasets/weather-source-data/weather.csv
-#      - airpollpredictor/clean_weather.py
-#    params:
-#      - weather-features
-#    outs:
-#      - airpollpredictor/datasets/weather-clean-data/weather.csv
+  clean-weather:
+    cmd: python airpollpredictor/clean_weather.py --input_file airpollpredictor/datasets/weather-source-data/weather.csv --output_file airpollpredictor/datasets/weather-clean-data/weather.csv --params params.yaml
+    deps:
+      - airpollpredictor/datasets/weather-source-data/weather.csv
+      - airpollpredictor/clean_weather.py
+    params:
+      - weather-features
+    outs:
+      - airpollpredictor/datasets/weather-clean-data/weather.csv
+
+  merge_enriched_weather:
+    cmd: python airpollpredictor/merge_enriched_weather.py --input_weather_file airpollpredictor/datasets/weather-clean-data/weather.csv --input_aqi_file airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv --output_file airpollpredictor/datasets/pollutants-weather-merged-data/aqi_all.csv --params params.yaml
+    deps:
+      - airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv
+      - airpollpredictor/datasets/weather-clean-data/weather.csv
+      - airpollpredictor/merge_enriched_weather.py
+    outs:
+      - airpollpredictor/datasets/pollutants-weather-merged-data/aqi_all.csv

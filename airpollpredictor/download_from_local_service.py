@@ -11,13 +11,9 @@ def parse_args(args_parser_name: str):
 
 
 async def __post(url: str, params: dict):
-    print(f"POST_REQUEST_PARAMS. url: {url}, save_dir_path: {params['save_dir_path']}, "
-          f"load_params: {params['load_params']}")
+    print(f"POST_REQUEST_PARAMS. url: {url}, load_params: {params['load_params']}")
     return requests.post(
         url=url,
-        params={
-            'save_dir_path': params['save_dir_path']
-        },
         json=params['load_params']
     )
 
