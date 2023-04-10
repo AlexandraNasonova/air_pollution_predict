@@ -1,9 +1,16 @@
+# pylint: disable=E0401
+
+from argparse import ArgumentParser
 import yaml
 import requests
-from argparse import ArgumentParser
 
 
 def parse_args(args_parser_name: str):
+    """
+    Parses command line args
+    @param args_parser_name: Parser name
+    @return: Parsed arguments
+    """
     parser = ArgumentParser(args_parser_name)
     parser.add_argument('--service_url', required=True, help='Loader service url')
     parser.add_argument('--params', required=True, help='Path to params')
@@ -27,8 +34,8 @@ async def get_response(url: str, response_params: dict) -> None:
 
 
 def get_params(args, params_section: str, sub_type: str):
-    with open(args.params, 'r') as fp:
-        params = yaml.safe_load(fp)[params_section]
+    with open(args.params, 'r', encoding='UTF-8') as file_stream:
+        params = yaml.safe_load(file_stream)[params_section]
     url = f'{args.service_url}/{params[f"end_point_{sub_type}"]}'
     request_params = params[f"request_params_{sub_type}"]
     return url, request_params

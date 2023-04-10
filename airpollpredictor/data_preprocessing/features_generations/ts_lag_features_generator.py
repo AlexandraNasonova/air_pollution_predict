@@ -220,6 +220,7 @@ def generate_lagged_features(
                                                           date_col, method_func, method_param, window)
 
                             rolling = shift(rolling_filled, group_col, date_col, lag)
+                            # pylint: disable=E1101,C0123
                             method_name = method.__name__ if type(method) != str else method
                             # method_name = method.__name__ if method.isinstance(str) else method
 

@@ -1,3 +1,5 @@
+# pylint: disable=E0401, E0611
+
 import asyncio
 import datetime
 import os
@@ -16,23 +18,26 @@ class AqiLoadParams(BaseModel):
     city: str | None = None
     stations_per_pollutants: dict[int, str]
 
+    # pylint: disable=E0213, R0201
     @validator('country_code')
-    def country_code_must_have_value(cls, v: str):
-        if v is None or len(v.strip()) == 0:
+    def country_code_must_have_value(cls, value: str):
+        if value is None or len(value.strip()) == 0:
             raise ValueError('country_code must have value')
-        return v
+        return value
 
+    # pylint: disable=E0213, R0201
     @validator('save_dir_path')
-    def save_dir_path_must_have_value(cls, v: str):
-        if v is None or len(v.strip()) == 0:
+    def save_dir_path_must_have_value(cls, value: str):
+        if value is None or len(value.strip()) == 0:
             raise ValueError('save_dir_path must have value')
-        return v
+        return value
 
+    # pylint: disable=E0213, R0201
     @validator('stations_per_pollutants')
-    def stations_per_pollutants_must_have_value(cls, v: dict[int, str]):
-        if v is None or len(v.keys()) == 0:
+    def stations_per_pollutants_must_have_value(cls, value: dict[int, str]):
+        if value is None or len(value.keys()) == 0:
             raise ValueError('stations_per_pollutants must have values')
-        return v
+        return value
 
 
 @app.post("/download_prev_years")
@@ -65,10 +70,10 @@ def download_current_year(load_params: AqiLoadParams):
 
 
 @app.post("/test")
-def test(save_dir_path: str, a: str):
+def test(save_dir_path: str, text: str):
     file_path = os.path.join(save_dir_path, 'test.txt')
     with open(file_path, 'w', encoding='UTF8') as file_stream:
-        file_stream.write(a)
+        file_stream.write(text)
 
 
 """

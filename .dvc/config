@@ -1,2 +1,6 @@
 [core]
     analytics = false
+    remote = datasets
+['remote "datasets"']
+    url = s3://air-pol-datasets-bucket
+    endpointurl = https://gateway.storjshare.io

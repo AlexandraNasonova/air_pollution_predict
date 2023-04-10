@@ -1,3 +1,5 @@
+# pylint: disable=E0401, E0611
+
 import asyncio
 import datetime
 from fastapi import FastAPI
@@ -12,17 +14,19 @@ class WeatherLoadParams(BaseModel):
     save_file_path: str
     date_from: str | None = None
 
+    # pylint: disable=E0213, R0201
     @validator('station_id')
-    def station_id_must_have_value(cls, v: str):
-        if v is None or len(v.strip()) == 0:
+    def station_id_must_have_value(cls, value: str):
+        if value is None or len(value.strip()) == 0:
             raise ValueError('station_id must have value')
-        return v
+        return value
 
+    # pylint: disable=E0213, R0201
     @validator('save_file_path')
-    def save_file_path_must_have_value(cls, v: str):
-        if v is None or len(v.strip()) == 0:
+    def save_file_path_must_have_value(cls, value: str):
+        if value is None or len(value.strip()) == 0:
             raise ValueError('save_file_path must have value')
-        return v
+        return value
 
 
 @app.post("/download_prev_years")

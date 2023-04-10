@@ -5,8 +5,8 @@ stages:
       --params params.yaml
     deps:
     - path: airpollpredictor/download_pollutants.py
-      md5: bc883852bd1f8d417b933618292c72a7
-      size: 481
+      md5: 2a0010f2a09e2ff619ba9e13d6a2e736
+      size: 594
     params:
       params.yaml:
         download-pollutants:
@@ -51,8 +51,8 @@ stages:
       --params params.yaml
     deps:
     - path: airpollpredictor/download_weather.py
-      md5: 216742780a937a6917381eae1406d51d
-      size: 487
+      md5: cb8f8529f0cbea75d3f83a0ee8b734f2
+      size: 555
     params:
       params.yaml:
         download-weather:
@@ -70,8 +70,8 @@ stages:
       --output_folder airpollpredictor/datasets/pollutants-clean-data/ --params params.yaml
     deps:
     - path: airpollpredictor/clean_pollutants.py
-      md5: 6588a292a1719b0b51339b5848753726
-      size: 1687
+      md5: 6a5aced4b84bab9c16c0e95e92d8964d
+      size: 1639
     - path: airpollpredictor/datasets/pollutants-source-data/5/NL_5_28280_2023_timeseries.csv
       md5: 46959ffd3e9369956b58827e06fd3b71
       size: 546361
@@ -109,8 +109,8 @@ stages:
       --output_folder airpollpredictor/datasets/pollutants-aqi-data/ --params params.yaml
     deps:
     - path: airpollpredictor/calculate_aqi.py
-      md5: 7c8accf8bd84c7983a895e5556b66030
-      size: 1228
+      md5: d4eb26fca5eb2c53a22b11bd9d1506c9
+      size: 1180
     - path: airpollpredictor/datasets/pollutants-clean-data/5.csv
       md5: 4b863dcea13a3f4fa5cc41a41ec2acb7
       size: 64635
@@ -161,8 +161,8 @@ stages:
       md5: 94241d509ef6d6fe105000034b533780
       size: 66369
     - path: airpollpredictor/enrich_pollutants.py
-      md5: 715f4fb00e92a677396f3611563b206d
-      size: 2276
+      md5: bc5c9b62d2039f21236a73f8fe3168b2
+      size: 2223
     params:
       params.yaml:
         enrich-pollutants:
@@ -202,7 +202,6 @@ stages:
           ewm_filters_aqi:
             NoFilter:
             - 7
-            - 14
             - 21
             - 28
             weekday:
@@ -220,16 +219,16 @@ stages:
         - 8
     outs:
     - path: airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv
-      md5: 64ace299a044d4c7ec6d59e294da39d8
-      size: 827123
+      md5: bdadcb50c4a980195f393fef2960df32
+      size: 788985
   clean-weather:
     cmd: python airpollpredictor/clean_weather.py --input_file airpollpredictor/datasets/weather-source-data/weather.csv
       --output_file airpollpredictor/datasets/weather-clean-data/weather.csv --params
       params.yaml
     deps:
     - path: airpollpredictor/clean_weather.py
-      md5: 279e89be8d5c1ec1e0e067b724513ec3
-      size: 1026
+      md5: f3fbb43ebc5a1b1da827f3600b0f96e5
+      size: 1221
     - path: airpollpredictor/datasets/weather-source-data/weather.csv
       md5: 458a59e8a9bcd2b148b1c758dcd07c26
       size: 5152
@@ -255,15 +254,15 @@ stages:
       --params params.yaml
     deps:
     - path: airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv
-      md5: 64ace299a044d4c7ec6d59e294da39d8
-      size: 827123
+      md5: bdadcb50c4a980195f393fef2960df32
+      size: 788985
     - path: airpollpredictor/datasets/weather-clean-data/weather.csv
       md5: 4d7d461987f571e02850eaf93276e0c9
       size: 4946
     - path: airpollpredictor/merge_enriched_weather.py
-      md5: 2b0ecfdc816b796e4b21976c83f5adbb
-      size: 1164
+      md5: 31065a4b8e462328abadfed9998d70dd
+      size: 1333
     outs:
     - path: airpollpredictor/datasets/pollutants-weather-merged-data/aqi_all.csv
-      md5: 2bba4d18db0740447177ff08179dcc47
-      size: 813559
+      md5: 81397baf9b2a9a5de69a8ad429e8f3e0
+      size: 775670

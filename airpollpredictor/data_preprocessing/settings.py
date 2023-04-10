@@ -1,5 +1,10 @@
-POL_USE_COLUMNS = ['Countrycode', 'AirQualityStation', 'SamplingPoint', 'SamplingProcess', 'UnitOfMeasurement',
-                   'Concentration', 'AveragingTime', 'DatetimeEnd', 'Validity', 'Verification']
+"""
+Constants used in data preprocessing
+"""
+
+POL_USE_COLUMNS = ['Countrycode', 'AirQualityStation', 'SamplingPoint',
+                   'SamplingProcess', 'UnitOfMeasurement', 'Concentration',
+                   'AveragingTime', 'DatetimeEnd', 'Validity', 'Verification']
 DATE_COLUMN_NAME = 'DatetimeEnd'
 CONCENTRATION_COLUMN_NAME = "Concentration"
 AQI_COLUMN_NAME = "AQI"

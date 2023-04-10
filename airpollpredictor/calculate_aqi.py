@@ -1,12 +1,18 @@
-import yaml
+# pylint: disable=E0401
+
 from argparse import ArgumentParser
+import yaml
 import data_preprocessing.aqi_estimator as aqi_calc
 
+SECTION = "calculate-aqi"
 
-# sys.path.insert(0, '/home/alexandra/work/projects/air_pol/air_pollution_predict/airpollpredictor/data_preprocessing')
-# sys.path.insert(0, '/home/alexandra/work/projects/air_pol/air_pollution_predict/airpollpredictor')
 
 def parse_args(args_parser_name: str):
+    """
+    Parses command line args
+    @param args_parser_name: Parser name
+    @return: Parsed arguments
+    """
     parser = ArgumentParser(args_parser_name)
     parser.add_argument('--input_folder', required=True, help='Path to clean data')
     parser.add_argument('--output_folder', required=True, help='Path to aqi data')
@@ -20,8 +26,7 @@ def process_data(source_data_path: str, output_data_path: str, pollutants_codes:
 
 
 if __name__ == '__main__':
-    section = "calculate-aqi"
-    stage_args = parse_args(section)
-    with open(stage_args.params, 'r') as fp:
-        pollutant_codes = yaml.safe_load(fp)["pollutants-codes"]
+    stage_args = parse_args(SECTION)
+    with open(stage_args.params, 'r', encoding='UTF-8') as file_stream:
+        pollutant_codes = yaml.safe_load(file_stream)["pollutants-codes"]
     process_data(stage_args.input_folder, stage_args.output_folder, pollutant_codes)

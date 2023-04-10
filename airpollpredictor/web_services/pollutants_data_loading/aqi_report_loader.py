@@ -88,8 +88,8 @@ async def csv_list_load(save_path: str, url_path: str) -> None:
     print(f'Loaded {len(txt_lists)} txt lists')
     repeated_reloads_for_dif_files = 0
     for txt_list in txt_lists:
-        file_stream = open(txt_list, "r", encoding='utf-8-sig')
-        txt_content = file_stream.read()
+        with open(txt_list, "r", encoding='utf-8-sig') as file_stream:
+            txt_content = file_stream.read()
         csv_list = txt_content.split()
         print(f'Loaded {len(csv_list)} csv urls for file {txt_list}')
         pollutant_id = os.path.splitext(os.path.basename(txt_list))[0]
