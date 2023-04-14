@@ -15,9 +15,10 @@ pydantic~=1.10.7
 uvicorn
 PyYAML~=6.0
 statsmodels~=0.13.5
-scipy~=1.10.0
-scikit-learn~=1.2.1
+scipy==1.10.1
+scikit-learn==1.2.2
 seaborn~=0.12.2
 progress
-awscli
+awscli==1.27.110
 dvc_s3
+mlflow

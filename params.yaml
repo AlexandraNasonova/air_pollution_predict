@@ -1,18 +1,8 @@
-pollutants-codes:
-  - 7
-  - 6001
-  - 5
-  - 8
+pollutants-codes: &pol_codes [7, 6001, 5, 8]
 
-weather-features:
-  - tavg
-  - tmin
-  - tmax
-  - prcp
-  - wdir
-  - wspd
-  - wpgt
-  - pres
+weather-features: &weather_columns ['tavg', 'tmin', 'tmax', 'prcp', 'wdir', 'wspd', 'wpgt', 'pres']
+
+date-features: &date_columns ['weekday', 'day', 'month', 'year', 'season', 'is_weekend', 'is_new_year']
 
 period-settings:
   year_start_train: 2023
@@ -40,48 +30,84 @@ download-pollutants:
         '8': 'STA-NL00418'
   
 enrich-pollutants:
-  lags-shifts:
-    - 7
-    - 10
-    - 12
-    - 14
-    - 21
-    - 28
-  filters:
-    - weekday
-    - month
+  lags-shifts: [7, 10, 12, 14, 21, 28]
+  filters: ['weekday', 'month']
   windows_filters_aqi:
-    NoFilter:
-      - 3D
-      - 5D
-      - 7D
-      - 14D
-      - 28D
-    weekday:
-      - 28D
-      - 56D
-    month:
-      - 90D
-  lag_agg_aqi:
-    - 7
-    - 10
-    - 14
-    - 21
-    - 28
-  methods_agg_aqi:
-    - mean
-    - median
-    - percentile(10)
-    - percentile(90)
-
+    NoFilter: ['3D', '5D', '7D', '14D', '28D']
+    weekday: ['28D', '56D']
+    month: ['90D']
+  lag_agg_aqi: [7, 10, 14, 21, 28]
+  methods_agg_aqi: ['mean', 'median', 'percentile(10)', 'percentile(90)']
   ewm_filters_aqi:
-    NoFilter:
-      - 7
-      - 14
-      - 21
-      - 28
-    weekday:
-      - 28
-      - 56
-    month:
-      - 90
+    NoFilter: [7, 14, 21, 28]
+    weekday: [28, 56]
+    month: [90]
+
+
+
+
+metric: &metric rmse
+
+split_periods:
+  train_date_from: '2015-01-08'
+  train_date_to: '2023-02-05'
+  val_date_from: '2023-02-06'
+  val_date_to: '2023-02-12'
+
+optuna:
+  objective: &objective regression
+  n_trials: 10
+  n_jobs: 6
+  cv_folders: 16
+  optimization_direction: 'minimize'
+
+columns_filters_gen: &columns_filters_gen
+  use_aqi_cols: True
+  use_c_mean_cols: False
+  use_c_max_cols: False
+  use_c_median_cols: False
+  use_c_min_cols: False
+  use_pol_cols: False
+  use_lag_cols: True
+  use_gen_lags_cols: True
+  use_weather_cols: True
+  pollutants_codes: *pol_codes
+  weather_columns: *weather_columns
+  date_columns: *date_columns
+
+lgbm_pm25:
+  pol_id: 6001
+  categories: [
+    ['month', 'weekday'],
+    ['season', 'month'],
+    ['season', 'month', 'weekday']
+  ]
+  default_category: ['month', 'weekday']
+  search_category: True
+  default_top_features_count: 73
+  default_params:
+    n_jobs: -1
+    verbosity: -1
+    objective: *objective
+    metric: *metric
+    boosting_type: 'gbdt'
+    extra_trees: False
+    n_estimators: 2100
+    num_leaves: 97
+    learning_rate: 0.11890042003021366
+    subsample: 0.4318782580934736
+    subsample_freq: 0
+    subsample_for_bin: 193295
+    min_child_samples: 14
+    reg_alpha: 0.394194026403052
+    reg_lambda: 0.708405421324422
+    max_depth: 3
+    max_bin: 206
+  prediction_value_type: 'AQI'
+  columns_filters: *columns_filters_gen
+
+
+
+
+
+

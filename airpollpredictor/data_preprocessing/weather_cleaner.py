@@ -5,7 +5,7 @@ Module for cleaning weather data
 """
 
 import pandas as pd
-from . import settings
+from settings import settings
 
 
 def clean(source_file_path: str, columns: list[str], output_file_path: str):

@@ -8,7 +8,7 @@ import os
 import warnings
 import numpy as np
 import pandas as pd
-from . import settings
+from settings import settings
 
 
 def get_merged_dataframes_per_pollutant(source_data_path: str, pollutants_codes: [int]):

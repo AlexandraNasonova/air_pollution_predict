@@ -7,7 +7,7 @@ stages:
       - download-weather
     outs:
       - airpollpredictor/datasets/weather-source-data/weather.csv
-    
+
   download-pollutants:
     cmd: python airpollpredictor/download_pollutants.py --service_url http://127.0.0.1:8040 --params params.yaml
     deps:
@@ -23,7 +23,7 @@ stages:
       - airpollpredictor/datasets/pollutants-source-data/7/NL_7_28284_2023_timeseries.csv
       - airpollpredictor/datasets/pollutants-source-data/8/NL_8_28398_2023_timeseries.csv
       - airpollpredictor/datasets/pollutants-source-data/6001/NL_6001_28131_2023_timeseries.csv
-    
+
   clean-pollutants:
     cmd: python airpollpredictor/clean_pollutants.py --input_folder airpollpredictor/datasets/pollutants-source-data/ --output_folder airpollpredictor/datasets/pollutants-clean-data/ --params params.yaml
     deps:
@@ -40,7 +40,7 @@ stages:
       - airpollpredictor/datasets/pollutants-clean-data/7.csv
       - airpollpredictor/datasets/pollutants-clean-data/8.csv
       - airpollpredictor/datasets/pollutants-clean-data/6001.csv
-     
+
   calculate-aqi:
     cmd: python airpollpredictor/calculate_aqi.py --input_folder airpollpredictor/datasets/pollutants-clean-data/ --output_folder airpollpredictor/datasets/pollutants-aqi-data/ --params params.yaml
     deps:
@@ -91,3 +91,39 @@ stages:
       - airpollpredictor/merge_enriched_weather.py
     outs:
       - airpollpredictor/datasets/pollutants-weather-merged-data/aqi_all.csv
+
+  filter_columns_lgbm_pm_25:
+    cmd: python airpollpredictor/filter_columns_for_model.py --input_file airpollpredictor/datasets/pollutants-weather-merged-data/aqi_all.csv --output_file airpollpredictor/experiments_results/lgbm/6001/aqi_filtered.csv --params params.yaml --params_section lgbm_pm25
+    deps:
+      - airpollpredictor/datasets/pollutants-weather-merged-data/aqi_all.csv
+      - airpollpredictor/filter_columns_for_model.py
+    params:
+      - lgbm_pm25
+      - columns_filters_gen
+    outs:
+      - airpollpredictor/experiments_results/lgbm/6001/aqi_filtered.csv
+
+  split_train_val_lgbm_pm_25:
+    cmd: python airpollpredictor/split_train_val.py --input_file airpollpredictor/experiments_results/lgbm/6001/aqi_filtered.csv --output_train_file airpollpredictor/experiments_results/lgbm/6001/train.csv --output_val_file airpollpredictor/experiments_results/lgbm/6001/val.csv --params params.yaml
+    deps:
+      - airpollpredictor/experiments_results/lgbm/6001/aqi_filtered.csv
+      - airpollpredictor/split_train_val.py
+    params:
+      - split_periods
+    outs:
+      - airpollpredictor/experiments_results/lgbm/6001/train.csv
+      - airpollpredictor/experiments_results/lgbm/6001/val.csv
+
+  tune_model_lgbm_pm_25:
+    cmd: python airpollpredictor/tune_lgbm_model.py --input_train_file airpollpredictor/experiments_results/lgbm/6001/train.csv --input_val_file airpollpredictor/experiments_results/lgbm/6001/val.csv --output_metrics_files airpollpredictor/experiments_results/lgbm/6001/metrics.json --params params.yaml --params_section lgbm_pm25 --mlflow_artifact lgbm_pm25_info
+    deps:
+      - airpollpredictor/experiments_results/lgbm/6001/train.csv
+      - airpollpredictor/tune_lgbm_model.py
+    params:
+      - lgbm_pm25
+      - metric
+      - optuna
+    outs:
+      - lgbm_pm25_info
+    metrics:
+      - airpollpredictor/experiments_results/lgbm/6001/metrics.json

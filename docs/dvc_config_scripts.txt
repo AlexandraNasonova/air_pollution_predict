@@ -28,5 +28,7 @@ git push
 dvc remote add -d datasets s3://air-pol-datasets-bucket
 dvc remote modify datasets endpointurl https://gateway.storjshare.io
 
-         
-         
+        
+// to pull later
+dvc remote modify --local gcs credentialpath "/path/to/service/key"
+dvc pull

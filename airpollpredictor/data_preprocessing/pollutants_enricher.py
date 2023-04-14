@@ -8,7 +8,7 @@ import pandas as pd
 from .features_generations import ts_lag_features_generator as lag_gen
 from .features_generations import ts_date_features_generator as date_gen
 from .aqi_calculations import aqi_calculator as aqc
-from . import settings
+from settings import settings
 
 CONCENTRATION_AGGREGATES = ['mean']
 CONCENTRATION_AGGREGATES_FOR_LAGS = ['mean']

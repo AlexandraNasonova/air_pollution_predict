@@ -1,0 +1,1 @@
+mlflow ui --port 5003 --default-artifact-root s3://mlflowbuscket --artifacts-destination s3://mlflowbucket

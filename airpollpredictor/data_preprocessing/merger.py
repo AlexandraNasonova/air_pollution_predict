@@ -4,7 +4,7 @@ Module mergers AQI and weather data
 """
 
 import pandas as pd
-from . import settings
+from settings import settings
 
 
 def merge(weather_file_path: str, aqi_file_path: str, output_file_path: str):
