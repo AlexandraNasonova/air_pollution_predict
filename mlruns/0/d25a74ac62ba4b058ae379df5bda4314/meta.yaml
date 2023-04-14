@@ -1,0 +1,15 @@
+artifact_uri: s3://air-pol-mlflow-bucket/0/d25a74ac62ba4b058ae379df5bda4314/artifacts
+end_time: 1681506322016
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: d25a74ac62ba4b058ae379df5bda4314
+run_name: worried-elk-617
+run_uuid: d25a74ac62ba4b058ae379df5bda4314
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1681506319890
+status: 4
+tags: []
+user_id: alexandra

@@ -6,7 +6,7 @@ dvc config core.analytics false
 dvc dag
 
 
-dv exp run -n test_depth_6 -S train.depth=6
+dvc exp run -n test_depth_6 -S train.depth=6
 
 dvc metrics show
 

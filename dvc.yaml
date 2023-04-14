@@ -1,93 +1,221 @@
 stages:
-  download-weather:
-    cmd: python airpollpredictor/download_weather.py --service_url http://127.0.0.1:8041 --params params.yaml
+  download-weather-prev-years:
+    cmd: python airpollpredictor/download_weather.py --service_url http://127.0.0.1:8041 --params params.yaml --params_section download-weather-prev-years
     deps:
       - airpollpredictor/download_weather.py
     params:
-      - download-weather
+      - download-weather-prev-years
     outs:
-      - airpollpredictor/datasets/weather-source-data/weather.csv
+      - airpollpredictor/datasets/weather-source-data/weather_prev_years.csv
 
-  download-pollutants:
-    cmd: python airpollpredictor/download_pollutants.py --service_url http://127.0.0.1:8040 --params params.yaml
+  download-weather-cur-year:
+    cmd: python airpollpredictor/download_weather.py --service_url http://127.0.0.1:8041 --params params.yaml --params_section download-weather-cur-year
+    deps:
+      - airpollpredictor/download_weather.py
+    params:
+      - download-weather-cur-year
+    outs:
+      - airpollpredictor/datasets/weather-source-data/weather_cur_year.csv
+
+  download-pollutants-prev-years:
+    cmd: python airpollpredictor/download_pollutants.py --service_url http://127.0.0.1:8040 --params params.yaml --params_section download-pollutants-prev-years
     deps:
       - airpollpredictor/download_pollutants.py
     params:
-      - download-pollutants
+      - download-pollutants-prev-years
     outs:
-      - airpollpredictor/datasets/pollutants-source-data/urls/5.txt
-      - airpollpredictor/datasets/pollutants-source-data/urls/7.txt
-      - airpollpredictor/datasets/pollutants-source-data/urls/8.txt
-      - airpollpredictor/datasets/pollutants-source-data/urls/6001.txt
-      - airpollpredictor/datasets/pollutants-source-data/5/NL_5_28280_2023_timeseries.csv
-      - airpollpredictor/datasets/pollutants-source-data/7/NL_7_28284_2023_timeseries.csv
-      - airpollpredictor/datasets/pollutants-source-data/8/NL_8_28398_2023_timeseries.csv
-      - airpollpredictor/datasets/pollutants-source-data/6001/NL_6001_28131_2023_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/urls/5.txt
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/urls/7.txt
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/urls/8.txt
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/urls/6001.txt
 
-  clean-pollutants:
-    cmd: python airpollpredictor/clean_pollutants.py --input_folder airpollpredictor/datasets/pollutants-source-data/ --output_folder airpollpredictor/datasets/pollutants-clean-data/ --params params.yaml
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2015_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2016_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2017_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2018_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2019_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2020_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2021_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2022_timeseries.csv
+
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2015_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2016_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2017_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2018_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2019_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2020_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2021_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2022_timeseries.csv
+
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2015_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2016_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2017_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2018_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2019_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2020_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2021_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2022_timeseries.csv
+
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2015_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2016_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2017_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_50425_2018_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_50425_2019_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_50425_2020_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2019_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2020_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2021_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2022_timeseries.csv
+
+  download-pollutants-cur-year:
+    cmd: python airpollpredictor/download_pollutants.py --service_url http://127.0.0.1:8040 --params params.yaml --params_section download-pollutants-cur-year
     deps:
-      - airpollpredictor/datasets/pollutants-source-data/5/NL_5_28280_2023_timeseries.csv
-      - airpollpredictor/datasets/pollutants-source-data/7/NL_7_28284_2023_timeseries.csv
-      - airpollpredictor/datasets/pollutants-source-data/8/NL_8_28398_2023_timeseries.csv
-      - airpollpredictor/datasets/pollutants-source-data/6001/NL_6001_28131_2023_timeseries.csv
+      - airpollpredictor/download_pollutants.py
+    params:
+      - download-pollutants-cur-year
+    outs:
+      - airpollpredictor/datasets/pollutants-source-data/cur_year/urls/5.txt
+      - airpollpredictor/datasets/pollutants-source-data/cur_year/urls/7.txt
+      - airpollpredictor/datasets/pollutants-source-data/cur_year/urls/8.txt
+      - airpollpredictor/datasets/pollutants-source-data/cur_year/urls/6001.txt
+      - airpollpredictor/datasets/pollutants-source-data/cur_year/5/NL_5_28280_2023_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/cur_year/7/NL_7_28284_2023_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/cur_year/8/NL_8_28398_2023_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/cur_year/6001/NL_6001_28131_2023_timeseries.csv
+
+  clean-pollutants-prev-years:
+    cmd: python airpollpredictor/clean_pollutants.py --input_folder airpollpredictor/datasets/pollutants-source-data/prev_years/ --output_folder airpollpredictor/datasets/pollutants-clean-data/prev_years/ --params params.yaml
+    deps:
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2015_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2016_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2017_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2018_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2019_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2020_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2021_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/5/NL_5_28280_2022_timeseries.csv
+
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2015_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2016_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2017_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2018_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2019_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2020_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2021_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/7/NL_7_28284_2022_timeseries.csv
+
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2015_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2016_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2017_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2018_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2019_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2020_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2021_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/8/NL_8_28398_2022_timeseries.csv
+
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2015_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2016_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2017_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_50425_2018_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_50425_2019_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_50425_2020_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2019_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2020_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2021_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2022_timeseries.csv
 
       - airpollpredictor/clean_pollutants.py
     params:
       - pollutants-codes
     outs:
-      - airpollpredictor/datasets/pollutants-clean-data/5.csv
-      - airpollpredictor/datasets/pollutants-clean-data/7.csv
-      - airpollpredictor/datasets/pollutants-clean-data/8.csv
-      - airpollpredictor/datasets/pollutants-clean-data/6001.csv
+      - airpollpredictor/datasets/pollutants-clean-data/prev_years/5.csv
+      - airpollpredictor/datasets/pollutants-clean-data/prev_years/7.csv
+      - airpollpredictor/datasets/pollutants-clean-data/prev_years/8.csv
+      - airpollpredictor/datasets/pollutants-clean-data/prev_years/6001.csv
 
-  calculate-aqi:
-    cmd: python airpollpredictor/calculate_aqi.py --input_folder airpollpredictor/datasets/pollutants-clean-data/ --output_folder airpollpredictor/datasets/pollutants-aqi-data/ --params params.yaml
+  clean-pollutants-cur-year:
+    cmd: python airpollpredictor/clean_pollutants.py --input_folder airpollpredictor/datasets/pollutants-source-data/cur_year/ --output_folder airpollpredictor/datasets/pollutants-clean-data/cur_year/ --params params.yaml
     deps:
-      - airpollpredictor/datasets/pollutants-clean-data/5.csv
-      - airpollpredictor/datasets/pollutants-clean-data/7.csv
-      - airpollpredictor/datasets/pollutants-clean-data/8.csv
-      - airpollpredictor/datasets/pollutants-clean-data/6001.csv
+      - airpollpredictor/datasets/pollutants-source-data/cur_year/5/NL_5_28280_2023_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/cur_year/7/NL_7_28284_2023_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/cur_year/8/NL_8_28398_2023_timeseries.csv
+      - airpollpredictor/datasets/pollutants-source-data/cur_year/6001/NL_6001_28131_2023_timeseries.csv
 
-      - airpollpredictor/calculate_aqi.py
+      - airpollpredictor/clean_pollutants.py
     params:
       - pollutants-codes
     outs:
-      - airpollpredictor/datasets/pollutants-aqi-data/5.csv
-      - airpollpredictor/datasets/pollutants-aqi-data/7.csv
-      - airpollpredictor/datasets/pollutants-aqi-data/8.csv
-      - airpollpredictor/datasets/pollutants-aqi-data/6001.csv
+      - airpollpredictor/datasets/pollutants-clean-data/cur_year/5.csv
+      - airpollpredictor/datasets/pollutants-clean-data/cur_year/7.csv
+      - airpollpredictor/datasets/pollutants-clean-data/cur_year/8.csv
+      - airpollpredictor/datasets/pollutants-clean-data/cur_year/6001.csv
 
-  enrich-pollutants:
-    cmd: python airpollpredictor/enrich_pollutants.py --input_folder airpollpredictor/datasets/pollutants-clean-data/ --output_file airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv --params params.yaml
+#  calculate-aqi:
+#    cmd: python airpollpredictor/calculate_aqi.py --input_folder airpollpredictor/datasets/pollutants-clean-data/ --output_folder airpollpredictor/datasets/pollutants-aqi-data/ --params params.yaml
+#    deps:
+#      - airpollpredictor/datasets/pollutants-clean-data/5.csv
+#      - airpollpredictor/datasets/pollutants-clean-data/7.csv
+#      - airpollpredictor/datasets/pollutants-clean-data/8.csv
+#      - airpollpredictor/datasets/pollutants-clean-data/6001.csv
+#
+#      - airpollpredictor/calculate_aqi.py
+#    params:
+#      - pollutants-codes
+#    outs:
+#      - airpollpredictor/datasets/pollutants-aqi-data/5.csv
+#      - airpollpredictor/datasets/pollutants-aqi-data/7.csv
+#      - airpollpredictor/datasets/pollutants-aqi-data/8.csv
+#      - airpollpredictor/datasets/pollutants-aqi-data/6001.csv
+
+  enrich-pollutants-prev-years:
+    cmd: python airpollpredictor/enrich_pollutants.py --input_prev_years_folder airpollpredictor/datasets/pollutants-clean-data/prev_years/ --output_file airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched_prev_years.csv --params params.yaml --params_section enrich-pollutants-prev-years
     deps:
-      - airpollpredictor/datasets/pollutants-clean-data/5.csv
-      - airpollpredictor/datasets/pollutants-clean-data/7.csv
-      - airpollpredictor/datasets/pollutants-clean-data/8.csv
-      - airpollpredictor/datasets/pollutants-clean-data/6001.csv
+      - airpollpredictor/datasets/pollutants-clean-data/prev_years/
       - airpollpredictor/enrich_pollutants.py
     params:
       - pollutants-codes
-      - period-settings
-      - enrich-pollutants
+      - enrich-pollutants-prev-years
     outs:
-      - airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv
+      - airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched_prev_years.csv
 
-  clean-weather:
-    cmd: python airpollpredictor/clean_weather.py --input_file airpollpredictor/datasets/weather-source-data/weather.csv --output_file airpollpredictor/datasets/weather-clean-data/weather.csv --params params.yaml
+  enrich-pollutants-cur-year:
+    cmd: python airpollpredictor/enrich_pollutants.py --input_cur_year_folder airpollpredictor/datasets/pollutants-clean-data/cur_year/ --input_prev_years_folder airpollpredictor/datasets/pollutants-clean-data/prev_years/ --output_file airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched_cur_year.csv --params params.yaml --params_section enrich-pollutants-cur-year
     deps:
-      - airpollpredictor/datasets/weather-source-data/weather.csv
+      - airpollpredictor/datasets/pollutants-clean-data/prev_years/
+      - airpollpredictor/datasets/pollutants-clean-data/cur_year/
+      - airpollpredictor/enrich_pollutants.py
+    params:
+      - pollutants-codes
+      - enrich-pollutants-cur-year
+    outs:
+      - airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched_cur_year.csv
+
+  clean-weather-prev-years:
+    cmd: python airpollpredictor/clean_weather.py --input_file airpollpredictor/datasets/weather-source-data/weather_prev_years.csv --output_file airpollpredictor/datasets/weather-clean-data/weather_prev_years.csv --params params.yaml
+    deps:
+      - airpollpredictor/datasets/weather-source-data/weather_prev_years.csv
       - airpollpredictor/clean_weather.py
     params:
       - weather-features
     outs:
-      - airpollpredictor/datasets/weather-clean-data/weather.csv
+      - airpollpredictor/datasets/weather-clean-data/weather_prev_years.csv
+
+  clean-weather-cur-year:
+    cmd: python airpollpredictor/clean_weather.py --input_file airpollpredictor/datasets/weather-source-data/weather_cur_year.csv --output_file airpollpredictor/datasets/weather-clean-data/weather_cur_year.csv --params params.yaml
+    deps:
+      - airpollpredictor/datasets/weather-source-data/weather_cur_year.csv
+      - airpollpredictor/clean_weather.py
+    params:
+      - weather-features
+    outs:
+      - airpollpredictor/datasets/weather-clean-data/weather_cur_year.csv
 
   merge_enriched_weather:
-    cmd: python airpollpredictor/merge_enriched_weather.py --input_weather_file airpollpredictor/datasets/weather-clean-data/weather.csv --input_aqi_file airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv --output_file airpollpredictor/datasets/pollutants-weather-merged-data/aqi_all.csv --params params.yaml
+    cmd: python airpollpredictor/merge_enriched_weather.py --input_weather_prev_years_file airpollpredictor/datasets/weather-clean-data/weather_prev_years.csv --input_weather_cur_year_file airpollpredictor/datasets/weather-clean-data/weather_cur_year.csv --input_aqi_prev_years_file airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched_prev_years.csv --input_aqi_cur_year_file airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched_cur_year.csv --output_file airpollpredictor/datasets/pollutants-weather-merged-data/aqi_all.csv --params params.yaml
     deps:
-      - airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched.csv
-      - airpollpredictor/datasets/weather-clean-data/weather.csv
+      - airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched_cur_year.csv
+      - airpollpredictor/datasets/weather-clean-data/
+
       - airpollpredictor/merge_enriched_weather.py
     outs:
       - airpollpredictor/datasets/pollutants-weather-merged-data/aqi_all.csv
@@ -116,9 +244,6 @@ stages:
 
   tune_model_lgbm_pm_25:
     cmd: python airpollpredictor/tune_lgbm_model.py --input_train_file airpollpredictor/experiments_results/lgbm/6001/train.csv --input_val_file airpollpredictor/experiments_results/lgbm/6001/val.csv --output_metrics_files airpollpredictor/experiments_results/lgbm/6001/metrics.json --params params.yaml --params_section lgbm_pm25 --mlflow_artifact lgbm_pm25_info
-    deps:
-      - airpollpredictor/experiments_results/lgbm/6001/train.csv
-      - airpollpredictor/tune_lgbm_model.py
     params:
       - lgbm_pm25
       - metric

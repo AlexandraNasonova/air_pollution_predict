@@ -14,6 +14,7 @@ def parse_args(args_parser_name: str):
     parser = ArgumentParser(args_parser_name)
     parser.add_argument('--service_url', required=True, help='Loader service url')
     parser.add_argument('--params', required=True, help='Path to params')
+    parser.add_argument('--params_section', required=True, help='Section with params')
     return parser.parse_args()
 
 
@@ -33,9 +34,9 @@ async def get_response(url: str, response_params: dict) -> None:
         raise ConnectionError()
 
 
-def get_params(args, params_section: str, sub_type: str):
+def get_params(args):
     with open(args.params, 'r', encoding='UTF-8') as file_stream:
-        params = yaml.safe_load(file_stream)[params_section]
-    url = f'{args.service_url}/{params[f"end_point_{sub_type}"]}'
-    request_params = params[f"request_params_{sub_type}"]
+        params = yaml.safe_load(file_stream)[args.params_section]
+    url = f'{args.service_url}/{params[f"end_point"]}'
+    request_params = params[f"request_params"]
     return url, request_params

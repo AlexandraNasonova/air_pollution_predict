@@ -11,6 +11,9 @@ import yaml
 from settings import settings
 import lgbm_tuner.columns_filter as col_filter
 from ml_tune_helpers.lgbm_optuna.optuna_lgb_search import OptunaLgbSearch
+import warnings
+warnings.filterwarnings('ignore')
+
 
 STAGE = "tune_lgbm_model"
 
@@ -48,7 +51,7 @@ def __send_model_to_ml_flow(x_train_df: pd.DataFrame, y_train_df: pd.DataFrame, 
                             optuna_params_settings: dict):
     signature = infer_signature(x_train_df, y_train_df)
     with mlflow.start_run() as run:
-        log_model(cb_model=model, signature=signature, artifact_path=artifact_path)
+        log_model(lgb_model=model, signature=signature, artifact_path=artifact_path)
         mlflow.log_metric(f'train_{metric_name}', train_score)
         mlflow.log_metric(f'val_{metric_name}', val_score)
         params = {"model_params": model_params_settings, "optuna_params": optuna_params_settings}
@@ -97,16 +100,23 @@ if __name__ == '__main__':
         cv_splitter=TimeSeriesSplit(optuna_params["cv_folders"]),
         warm_params=None)
 
+    print(f'----Optuna finished params tuning---')
+
     train_score_best, val_score_best, model_best = optuna_tuner.run_model_and_eval(
         params=optuna_tuner.study_best_params,
         categorical_features=optuna_tuner.study_best_params['categorical_features'],
         best_features_only=True,
         set_as_best_model=False)
 
+    print(f'---Model trained with best params: '
+          f'best_train_score: {train_score_best}, best_val_score: {val_score_best}')
+
     __save_metrics(metrics_output_file_path=stage_args.output_metrics_files,
                    train_score=train_score_best,
                    val_score=val_score_best,
                    metric_name=metric)
+
+    print(f'---Metrics saved locally---')
 
     __send_model_to_ml_flow(x_train_df=x_train,
                             y_train_df=y_train,
@@ -117,3 +127,5 @@ if __name__ == '__main__':
                             metric_name=metric,
                             model_params_settings=model_params,
                             optuna_params_settings=optuna_params)
+
+    print(f'---Model saved to MLFlow---')

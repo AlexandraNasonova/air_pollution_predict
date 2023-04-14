@@ -16,11 +16,8 @@ NO_FILTER = 'NoFilter'
 ID_COLS = []
 
 
-def generate_features(source_data_path: str,
-                      output_file: str,
+def generate_features(df_aqi_mean: pd.DataFrame,
                       pollutants_codes: list[int],
-                      date_from: str,
-                      date_end: str,
                       lags_shift: list[int],
                       filters_aqi: list[str],
                       windows_filters_aqi: dict,
@@ -29,11 +26,8 @@ def generate_features(source_data_path: str,
                       ewm_filters_aqi: dict):
     """
     Generates lag and data features for pollutants and saves the result to one file
-    @param source_data_path: The path to pollutant files
-    @param output_file: The output path to the resulting .csv file
+    @param df_aqi_mean: Merged dataframe
     @param pollutants_codes: The list of pollutant codes
-    @param date_from: The first date of the data sources
-    @param date_end: The last date of the data sources
     @param lags_shift: The list of lags for the shift
     @param filters_aqi: The list of columns for the lags filtering
     (for AQI columns)
@@ -47,19 +41,16 @@ def generate_features(source_data_path: str,
     per filter (for AQI columns)
     @return:
     """
-    df_aqi_mean = calc_aqi_and_mean_concentration_and_merge(
-        source_data_path=source_data_path, pollutants_codes=pollutants_codes,
-        date_from=date_from, date_end=date_end)
     df_aqi_mean = date_gen.add_date_info(df_aqi_mean)
     df_aqi_mean_lags = __get_all_lag_data(
         pollutants_codes=pollutants_codes, df_gen=df_aqi_mean, lags_shift=lags_shift,
         filters_aqi=filters_aqi, windows_filters_aqi=windows_filters_aqi,
         methods_agg_aqi=methods_agg_aqi, lags_agg_aqi=lags_agg_aqi,
         ewm_filters_aqi=ewm_filters_aqi)
-    __save_calc(df_aqi_mean_lags, output_file)
+    return df_aqi_mean_lags
 
 
-def __save_calc(df_enriched: pd.DataFrame, output_file: str):
+def save_calc(df_enriched: pd.DataFrame, output_file: str):
     df_enriched.to_csv(output_file)
 
 
@@ -189,13 +180,13 @@ def __get_lag_data_aqi(pollutants_codes: list[int], df_gen: pd.DataFrame,
 
 
 def __get_lag_data_concentration(pollutants_codes: list[int],
-                               df_gen: pd.DataFrame,
-                               id_cols: [],
-                               filters: [],
-                               windows: dict,
-                               method,
-                               lags: [],
-                               ewm_params: dict) -> pd.DataFrame:
+                                 df_gen: pd.DataFrame,
+                                 id_cols: [],
+                                 filters: [],
+                                 windows: dict,
+                                 method,
+                                 lags: [],
+                                 ewm_params: dict) -> pd.DataFrame:
     target_cols = __get_concentration_columns_by_method(pollutants_codes, df_gen, method)
     agg_methods = [method]
     df_lagged_features = lag_gen \
@@ -215,13 +206,13 @@ def __get_lag_data_concentration(pollutants_codes: list[int],
 
 
 def __get_all_lag_data(pollutants_codes: list[int],
-                     df_gen: pd.DataFrame,
-                     lags_shift: list[int],
-                     filters_aqi: list[str],
-                     windows_filters_aqi: dict,
-                     methods_agg_aqi: list[str],
-                     lags_agg_aqi: list[int],
-                     ewm_filters_aqi: dict) -> pd.DataFrame:
+                       df_gen: pd.DataFrame,
+                       lags_shift: list[int],
+                       filters_aqi: list[str],
+                       windows_filters_aqi: dict,
+                       methods_agg_aqi: list[str],
+                       lags_agg_aqi: list[int],
+                       ewm_filters_aqi: dict) -> pd.DataFrame:
     df_gen_shift = __get_lag_data_shift(pollutants_codes=pollutants_codes,
                                         df_gen=df_gen,
                                         lags=lags_shift)

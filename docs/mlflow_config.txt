@@ -1,1 +1,6 @@
-mlflow ui --port 5003 --default-artifact-root s3://mlflowbuscket --artifacts-destination s3://mlflowbucket
+mlflow ui --port 5003 --default-artifact-root s3://air-pol-mlflow-bucket --artifacts-destination s3://air-pol-mlflow-bucket
+
+export MLFLOW_TRACKING_URI=http://localhost:5003
+export MLFLOW_ENDPOINT_URI=https://gateway.storjshare.io
+
+

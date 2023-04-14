@@ -2,17 +2,23 @@
 
 from argparse import ArgumentParser
 import datetime
+
+import pandas as pd
 import yaml
 import data_preprocessing.pollutants_enricher as pol_enrich
+from settings import settings
 
 STAGE = "enrich-pollutants"
 
 
 def __parse_args():
     parser = ArgumentParser(STAGE)
-    parser.add_argument('--input_folder', required=True, help='Path to clean data')
+    parser.add_argument('--input_prev_years_folder', required=True, help='Path to clean data prev_years')
+    parser.add_argument('--input_cur_year_folder', required=False, help='Path to clean data cur_year')
     parser.add_argument('--output_file', required=True, help='Path to enriched file')
     parser.add_argument('--params', required=True, help='Path to params')
+    parser.add_argument('--params_section', required=True, help='Section with params')
+
     return parser.parse_args()
 
 
@@ -22,29 +28,45 @@ if __name__ == '__main__':
         params_yaml = yaml.safe_load(file_stream)
 
     pollutants_codes = params_yaml["pollutants-codes"]
-    enrich_params = params_yaml["enrich-pollutants"]
-    period_settings = params_yaml["period-settings"]
+    params = params_yaml[stage_args.params_section]
+    enrich_params = params['params']
+    date_prev_from = params['date_prev_from']
+    date_prev_to = params['date_prev_to']
 
-    lags_shift = enrich_params["lags-shifts"]
-    filters = enrich_params["filters"]
-    windows_filters_aqi = enrich_params["windows_filters_aqi"]
-    lag_agg_aqi = enrich_params["lag_agg_aqi"]
-    methods_agg_aqi = enrich_params["methods_agg_aqi"]
-    ewm_filters_aqi = enrich_params["ewm_filters_aqi"]
-    year_from = period_settings["year_start_train"]
+    df_aqi = None
+    date_save_from = datetime.datetime.strptime(date_prev_from, "%Y-%m-%d").date()
 
-    DATE_FROM = str(datetime.date(year=year_from, month=1, day=1))
-    DATE_TO = str(datetime.datetime.now().date())
+    # only previous data
 
-    pol_enrich.generate_features(source_data_path=stage_args.input_folder,
-                                 output_file=stage_args.output_file,
-                                 pollutants_codes=pollutants_codes,
-                                 date_from=DATE_FROM,
-                                 date_end=DATE_TO,
-                                 lags_shift=lags_shift,
-                                 filters_aqi=filters,
-                                 windows_filters_aqi=windows_filters_aqi,
-                                 methods_agg_aqi=methods_agg_aqi,
-                                 lags_agg_aqi=lag_agg_aqi,
-                                 ewm_filters_aqi=ewm_filters_aqi
-                                 )
+    df_aqi = pol_enrich.calc_aqi_and_mean_concentration_and_merge(
+        source_data_path=stage_args.input_prev_years_folder, pollutants_codes=pollutants_codes,
+        date_from=date_prev_from, date_end=date_prev_to)
+
+    # current data + 100 days of previous data to calculate lags
+    if stage_args.input_cur_year_folder is not None:
+        date_cur_from = params['date_cur_from']
+        date_cur_to = params['date_cur_to']
+        df_aqi_cur = pol_enrich.calc_aqi_and_mean_concentration_and_merge(
+            source_data_path=stage_args.input_cur_year_folder, pollutants_codes=pollutants_codes,
+            date_from=date_cur_from, date_end=date_cur_to)
+        df_aqi = pd.concat([df_aqi, df_aqi_cur])
+        print(f'DEBUG ENRICH POLLUTANTS: date_from {date_cur_from}, df_aqi.shape: {df_aqi.shape}')
+        date_cur_from_d = datetime.datetime.strptime(date_cur_from, "%Y-%m-%d").date()
+        date_cut = (date_cur_from_d - datetime.timedelta(days=100)).strftime("%Y-%m-%d")
+        df_aqi = df_aqi[date_cut:]
+        print(f'DEBUG ENRICH POLLUTANTS: date_cut {date_cut}, df_aqi.shape: {df_aqi.shape}')
+        date_save_from = date_cur_from_d
+
+    df_aqi = pol_enrich.generate_features(df_aqi_mean=df_aqi,
+                                          pollutants_codes=pollutants_codes,
+                                          lags_shift=enrich_params["lags-shifts"],
+                                          filters_aqi=enrich_params["filters"],
+                                          windows_filters_aqi=enrich_params["windows_filters_aqi"],
+                                          methods_agg_aqi=enrich_params["methods_agg_aqi"],
+                                          lags_agg_aqi=enrich_params["lag_agg_aqi"],
+                                          ewm_filters_aqi=enrich_params["ewm_filters_aqi"]
+                                          )
+
+    print(f'DEBUG ENRICH POLLUTANTS: date_save_from {date_save_from}, df_aqi.shape{df_aqi.shape}')
+    df_aqi = df_aqi[date_save_from:]
+    pol_enrich.save_calc(df_enriched=df_aqi, output_file=stage_args.output_file)

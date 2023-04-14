@@ -3,7 +3,6 @@
 import asyncio
 import datetime
 import os
-
 from fastapi import FastAPI
 from pydantic import BaseModel, validator
 from . import aqi_report_loader
@@ -13,7 +12,8 @@ app = FastAPI()
 
 class AqiLoadParams(BaseModel):
     save_dir_path: str
-    year_from_train: int | None = 2015
+    date_from: str
+    date_to: str
     country_code: str
     city: str | None = None
     stations_per_pollutants: dict[int, str]
@@ -40,32 +40,20 @@ class AqiLoadParams(BaseModel):
         return value
 
 
-@app.post("/download_prev_years")
-def download_prev_years(load_params: AqiLoadParams):
+@app.post("/download")
+def download(load_params: AqiLoadParams):
+    date_from = datetime.datetime.strptime(load_params.date_from, "%Y-%m-%d").date()
+    date_to = datetime.datetime.strptime(load_params.date_to, "%Y-%m-%d").date()
+
     urls_path = asyncio.run(
         aqi_report_loader.pollutants_txt_lists_load(
             save_dir_path=load_params.save_dir_path,
-            year_from=load_params.year_from_train,
-            year_to=datetime.datetime.now().year - 1,
+            year_from=date_from.year,
+            year_to=date_to.year,
             pollutant_codes=list(load_params.stations_per_pollutants.keys()),
             country=load_params.country_code,
             city=load_params.city,
             station_per_pollutant=load_params.stations_per_pollutants))
-    asyncio.run(aqi_report_loader.csv_list_load(load_params.save_dir_path, urls_path))
-
-
-@app.post("/download_current_year")
-def download_current_year(load_params: AqiLoadParams):
-    urls_path = asyncio.run(
-        aqi_report_loader.pollutants_txt_lists_load(
-            save_dir_path=load_params.save_dir_path,
-            year_from=datetime.datetime.now().year,
-            year_to=datetime.datetime.now().year,
-            pollutant_codes=list(load_params.stations_per_pollutants.keys()),
-            country=load_params.country_code,
-            city=load_params.city,
-            station_per_pollutant=load_params.stations_per_pollutants))
-
     asyncio.run(aqi_report_loader.csv_list_load(load_params.save_dir_path, urls_path))
 
 
