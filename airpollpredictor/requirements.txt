@@ -4,7 +4,6 @@ pmdarima~=2.0.3
 dvc
 ipywidgets~=8.0.6
 ipython~=8.12.0
-joblib
 matplotlib~=3.7.1
 numpy~=1.24.2
 pandas~=2.0.0
@@ -18,7 +17,11 @@ statsmodels~=0.13.5
 scipy==1.10.1
 scikit-learn==1.2.2
 seaborn~=0.12.2
-progress
+progress~=1.6
 awscli==1.27.110
 dvc_s3
-mlflow
+mlflow~=2.2.2
+onnxmltools~=1.11.2
+skl2onnx
+onnx
+onnxruntime

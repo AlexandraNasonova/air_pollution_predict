@@ -1,0 +1,15 @@
+artifact_uri: s3://air-pol-mlflow-bucket/0/53302f0b68654fddbf902b3cc89a5861/artifacts
+end_time: 1681513531040
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 53302f0b68654fddbf902b3cc89a5861
+run_name: clumsy-carp-269
+run_uuid: 53302f0b68654fddbf902b3cc89a5861
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1681513529239
+status: 4
+tags: []
+user_id: alexandra

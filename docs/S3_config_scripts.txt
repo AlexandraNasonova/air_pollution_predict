@@ -9,4 +9,4 @@ aws configure
 aws configure set s3.multipart_threshold 64MB
 
 //check buckets
-aws s3 --endpoint-url=https://gateway.storjshare.io ls
+aws s3 --endpoint-url=https://gateway.storjshare.io ls s3://air-pol-mlflow-bucket

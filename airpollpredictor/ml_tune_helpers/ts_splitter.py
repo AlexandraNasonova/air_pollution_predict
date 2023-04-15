@@ -5,6 +5,12 @@ import datetime
 import pandas as pd
 
 
+def extract_labels(df_timeseries: pd.DataFrame, target_column: str):
+    x_ts = df_timeseries.drop([target_column], axis=1)
+    y_ts = df_timeseries[target_column]
+    return x_ts, y_ts
+
+
 def split_x_y(df_timeseries: pd.DataFrame, index_cols: [], y_value_col: str) \
         -> (pd.DataFrame, pd.DataFrame):
     """

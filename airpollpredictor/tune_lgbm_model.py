@@ -6,11 +6,16 @@ import json
 import mlflow
 from mlflow.models.signature import infer_signature
 from mlflow.lightgbm import log_model
+import onnx
+from onnxmltools.convert import convert_lightgbm
+from skl2onnx.common.data_types import FloatTensorType
 from sklearn.model_selection import TimeSeriesSplit
 import yaml
 from settings import settings
 import lgbm_tuner.columns_filter as col_filter
+import ml_tune_helpers.ts_splitter as ts_splitter
 from ml_tune_helpers.lgbm_optuna.optuna_lgb_search import OptunaLgbSearch
+import ml_tune_helpers.onnx_wrapper as onnx_wrapper
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -22,17 +27,12 @@ def __parse_args():
     parser = ArgumentParser(STAGE)
     parser.add_argument('--input_train_file', required=True, help='Path to input train data')
     parser.add_argument('--input_val_file', required=True, help='Path to input validation data')
-    parser.add_argument('--output_metrics_files', required=True, help='Path to metrics file')
+    parser.add_argument('--output_metrics_file', required=True, help='Path to metrics file')
+    parser.add_argument('--output_onnx_file', required=True, help='Path to onnx file')
     parser.add_argument('--params', required=True, help='Path to params')
     parser.add_argument('--params_section', required=True, help='Section with filter params')
     parser.add_argument('--mlflow_artifact', required=True, help='MLFlow model artifacts path')
     return parser.parse_args()
-
-
-def __extract_labels(df_ts: pd.DataFrame, target_column: str):
-    x_ts = df_ts.drop([target_column], axis=1)
-    y_ts = df_ts[target_column]
-    return x_ts, y_ts
 
 
 def __save_metrics(metrics_output_file_path: str, train_score: float, val_score: float,
@@ -58,6 +58,7 @@ def __send_model_to_ml_flow(x_train_df: pd.DataFrame, y_train_df: pd.DataFrame, 
         mlflow.log_params(params)
 
 
+
 if __name__ == '__main__':
     stage_args = __parse_args()
     with open(stage_args.params, 'r', encoding='UTF-8') as file_stream:
@@ -75,8 +76,8 @@ if __name__ == '__main__':
                            index_col=settings.DATE_COLUMN_NAME)
     df_val = pd.read_csv(stage_args.input_val_file, parse_dates=True,
                          index_col=settings.DATE_COLUMN_NAME)
-    x_train, y_train = __extract_labels(df_train, target_column_name)
-    x_val, y_val = __extract_labels(df_val, target_column_name)
+    x_train, y_train = ts_splitter.extract_labels(df_train, target_column_name)
+    x_val, y_val = ts_splitter.extract_labels(df_val, target_column_name)
 
     optuna_tuner = OptunaLgbSearch(
         study_name=f'lgbm_{pol_id if pol_id > 0 else "all"}',
@@ -111,21 +112,26 @@ if __name__ == '__main__':
     print(f'---Model trained with best params: '
           f'best_train_score: {train_score_best}, best_val_score: {val_score_best}')
 
-    __save_metrics(metrics_output_file_path=stage_args.output_metrics_files,
+    __save_metrics(metrics_output_file_path=stage_args.output_metrics_file,
                    train_score=train_score_best,
                    val_score=val_score_best,
                    metric_name=metric)
 
     print(f'---Metrics saved locally---')
 
-    __send_model_to_ml_flow(x_train_df=x_train,
-                            y_train_df=y_train,
-                            train_score=train_score_best,
-                            val_score=val_score_best,
-                            artifact_path=stage_args.mlflow_artifact,
-                            model=model_best,
-                            metric_name=metric,
-                            model_params_settings=model_params,
-                            optuna_params_settings=optuna_params)
+    # __send_model_to_ml_flow(x_train_df=x_train,
+    #                         y_train_df=y_train,
+    #                         train_score=train_score_best,
+    #                         val_score=val_score_best,
+    #                         artifact_path=stage_args.mlflow_artifact,
+    #                         model=model_best,
+    #                         metric_name=metric,
+    #                         model_params_settings=model_params,
+    #                         optuna_params_settings=optuna_params)
 
-    print(f'---Model saved to MLFlow---')
+    # print(f'---Model saved to MLFlow---')
+
+    onnx_wrapper.save_model(x_train_df=x_train, model=model_best,
+                            onnx_file_path=stage_args.output_onnx_file)
+
+    print(f'---Model saved to ONNX---')

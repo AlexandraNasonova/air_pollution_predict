@@ -1,6 +1,13 @@
-mlflow ui --port 5003 --default-artifact-root s3://air-pol-mlflow-bucket --artifacts-destination s3://air-pol-mlflow-bucket
+source ~/work/air_pol/air_pollution_predict/airpollpredictor/venv/bin/activate
+
 
 export MLFLOW_TRACKING_URI=http://localhost:5003
 export MLFLOW_ENDPOINT_URI=https://gateway.storjshare.io
+export AWS_ACCESS_KEY=jvcdsd5y4mlm4iv4jn54jpnkyy5a
+export AWS_SECRET_ACCESS_KEY=j3qc4vai4v4glt46k2i67vf2irppyblov6gcowvfejkx5nc7f3t5i
 
+mlflow ui --port 5003 --default-artifact-root s3://air-pol-mlflow-bucket --artifacts-destination s3://air-pol-mlflow-bucket
+
+
+sudo kill -9 $(sudo lsof -t -i:5003)
 

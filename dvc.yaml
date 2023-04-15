@@ -243,7 +243,7 @@ stages:
       - airpollpredictor/experiments_results/lgbm/6001/val.csv
 
   tune_model_lgbm_pm_25:
-    cmd: python airpollpredictor/tune_lgbm_model.py --input_train_file airpollpredictor/experiments_results/lgbm/6001/train.csv --input_val_file airpollpredictor/experiments_results/lgbm/6001/val.csv --output_metrics_files airpollpredictor/experiments_results/lgbm/6001/metrics.json --params params.yaml --params_section lgbm_pm25 --mlflow_artifact lgbm_pm25_info
+    cmd: python airpollpredictor/tune_lgbm_model.py --input_train_file airpollpredictor/experiments_results/lgbm/6001/train.csv --input_val_file airpollpredictor/experiments_results/lgbm/6001/val.csv --output_metrics_file airpollpredictor/experiments_results/lgbm/6001/metrics.json --output_onnx_file airpollpredictor/experiments_results/lgbm/6001/model.onnx --params params.yaml --params_section lgbm_pm25 --mlflow_artifact lgbm_pm25_info
     params:
       - lgbm_pm25
       - metric
@@ -252,3 +252,4 @@ stages:
       - lgbm_pm25_info
     metrics:
       - airpollpredictor/experiments_results/lgbm/6001/metrics.json
+      - airpollpredictor/experiments_results/lgbm/6001/model.onnx

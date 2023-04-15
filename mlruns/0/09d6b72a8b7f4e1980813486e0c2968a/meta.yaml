@@ -1,0 +1,15 @@
+artifact_uri: s3://air-pol-mlflow-bucket/0/09d6b72a8b7f4e1980813486e0c2968a/artifacts
+end_time: 1681515483163
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 09d6b72a8b7f4e1980813486e0c2968a
+run_name: marvelous-donkey-483
+run_uuid: 09d6b72a8b7f4e1980813486e0c2968a
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1681515481346
+status: 4
+tags: []
+user_id: alexandra
