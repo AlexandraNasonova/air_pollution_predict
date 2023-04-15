@@ -997,3 +997,91 @@ stages:
     - path: airpollpredictor/datasets/pollutants-enrich-data/aqi_enriched_cur_year.csv
       md5: b0ec3e4ca596a804e6aeb2e640ecc74a
       size: 1524134
+  tune_model_lgbm_pm_25:
+    cmd: python airpollpredictor/tune_lgbm_model.py --input_train_file airpollpredictor/experiments_results/lgbm/6001/train.csv
+      --input_val_file airpollpredictor/experiments_results/lgbm/6001/val.csv --output_metrics_file
+      airpollpredictor/experiments_results/lgbm/6001/metrics.json --output_onnx_file
+      airpollpredictor/experiments_results/lgbm/6001/model.onnx --params params.yaml
+      --params_section lgbm_pm25 --mlflow_artifact lgbm_pm25_info
+    params:
+      params.yaml:
+        lgbm_pm25:
+          pol_id: 6001
+          categories:
+          - - month
+            - weekday
+          - - season
+            - month
+          - - season
+            - month
+            - weekday
+          default_category:
+          - month
+          - weekday
+          search_category: true
+          default_top_features_count: 30
+          default_params:
+            n_jobs: -1
+            verbosity: -1
+            objective: regression
+            metric: rmse
+            boosting_type: gbdt
+            extra_trees: false
+            n_estimators: 2100
+            num_leaves: 97
+            learning_rate: 0.11890042003021366
+            subsample: 0.4318782580934736
+            subsample_freq: 0
+            subsample_for_bin: 193295
+            min_child_samples: 14
+            reg_alpha: 0.394194026403052
+            reg_lambda: 0.708405421324422
+            max_depth: 3
+            max_bin: 206
+          prediction_value_type: AQI
+          columns_filters:
+            use_aqi_cols: true
+            use_c_mean_cols: false
+            use_c_max_cols: false
+            use_c_median_cols: false
+            use_c_min_cols: false
+            use_pol_cols: false
+            use_lag_cols: true
+            use_gen_lags_cols: true
+            use_weather_cols: true
+            pollutants_codes:
+            - 7
+            - 6001
+            - 5
+            - 8
+            weather_columns:
+            - tavg
+            - tmin
+            - tmax
+            - prcp
+            - wdir
+            - wspd
+            - wpgt
+            - pres
+            date_columns:
+            - weekday
+            - day
+            - month
+            - year
+            - season
+            - is_weekend
+            - is_new_year
+        metric: rmse
+        optuna:
+          objective: regression
+          n_trials: 5
+          n_jobs: 8
+          cv_folders: 16
+          optimization_direction: minimize
+    outs:
+    - path: airpollpredictor/experiments_results/lgbm/6001/metrics.json
+      md5: c9e97ea11e973ada2e2b1d118a6af527
+      size: 65
+    - path: airpollpredictor/experiments_results/lgbm/6001/model.onnx
+      md5: 385cf647a8c550c774e140027900d2f4
+      size: 167546

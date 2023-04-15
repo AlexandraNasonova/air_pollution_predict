@@ -249,7 +249,7 @@ stages:
       - metric
       - optuna
     outs:
-      - lgbm_pm25_info
+      # - lgbm_pm25_info
+      - airpollpredictor/experiments_results/lgbm/6001/model.onnx
     metrics:
       - airpollpredictor/experiments_results/lgbm/6001/metrics.json
-      - airpollpredictor/experiments_results/lgbm/6001/model.onnx
