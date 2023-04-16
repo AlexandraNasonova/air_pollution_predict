@@ -1,14 +1,12 @@
 # roject specific files and folders
-data_loading/aqreport_loader/data/*
-data_loading/data_weather/*
-datasources/aqi_calc/*
-datasources/aqi_enrich/*
-datasources/eda_cleanup_res/*
-datasources/pollutants_source/*
-datasources/weather/*
-datasources/ds_joint/*
-predict_experiments/lgbm/score.csv
-predict_experiments/lgbm/score_1.csv
+jupiter_experiments/datasources/aqi_calc/*
+jupiter_experiments/datasources/aqi_enrich/*
+jupiter_experiments/datasources/eda_cleanup_res/*
+jupiter_experiments/datasources/pollutants_source/*
+jupiter_experiments/datasources/weather/*
+jupiter_experiments/datasources/ds_joint/*
+jupiter_experiments/lgbm/score.csv
+jupiter_experiments/lgbm/score_1.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

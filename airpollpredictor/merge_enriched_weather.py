@@ -1,3 +1,6 @@
+"""
+DVC Stage merge_enriched_weather - merges enriched pollutants data and weather data
+"""
 # pylint: disable=E0401
 
 from argparse import ArgumentParser
@@ -22,6 +25,8 @@ def __parse_args():
 
 
 if __name__ == '__main__':
+    print(f'Stage {STAGE} started')
+
     stage_args = __parse_args()
     merger.merge(weather_prev_years_file_path=stage_args.input_weather_prev_years_file,
                  weather_cur_year_file_path=stage_args.input_weather_cur_year_file,
@@ -29,3 +34,4 @@ if __name__ == '__main__':
                  aqi_cur_year_file_path=stage_args.input_aqi_cur_year_file,
                  output_file_path=stage_args.output_file)
 
+    print(f'Stage {STAGE} finished')

@@ -1,3 +1,7 @@
+"""
+DVC Stage clean-pollutants - cleans loaded pollutants data
+"""
+
 # pylint: disable=E0401
 
 from argparse import ArgumentParser
@@ -27,6 +31,7 @@ def __process_data(source_data_path: str, output_data_path: str, pollutants_code
 
 
 if __name__ == '__main__':
+    print(f'Stage {STAGE} started')
     stage_args = __parse_args()
     with open(stage_args.params, 'r', encoding='UTF-8') as file_stream:
         pollutant_codes = yaml.safe_load(file_stream)["pollutants-codes"]
@@ -35,3 +40,4 @@ if __name__ == '__main__':
     __process_data(source_data_path=stage_args.input_folder,
                    output_data_path=stage_args.output_folder,
                    pollutants_codes=pollutant_codes)
+    print(f'Stage {STAGE} finished')

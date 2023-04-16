@@ -1,0 +1,2 @@
+0 2 * * * /airpoll/airpol_update_data.sh
+@reboot /airpoll/airpol_update_data.sh

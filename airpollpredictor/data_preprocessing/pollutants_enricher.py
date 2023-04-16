@@ -5,10 +5,10 @@ Module for enriching pollutants data with data and lag features
 
 import os
 import pandas as pd
+from settings import settings
 from .features_generations import ts_lag_features_generator as lag_gen
 from .features_generations import ts_date_features_generator as date_gen
 from .aqi_calculations import aqi_calculator as aqc
-from settings import settings
 
 CONCENTRATION_AGGREGATES = ['mean']
 CONCENTRATION_AGGREGATES_FOR_LAGS = ['mean']
@@ -48,10 +48,6 @@ def generate_features(df_aqi_mean: pd.DataFrame,
         methods_agg_aqi=methods_agg_aqi, lags_agg_aqi=lags_agg_aqi,
         ewm_filters_aqi=ewm_filters_aqi)
     return df_aqi_mean_lags
-
-
-def save_calc(df_enriched: pd.DataFrame, output_file: str):
-    df_enriched.to_csv(output_file)
 
 
 def calc_aqi_and_mean_concentration_and_merge(

@@ -1,6 +1,6 @@
 stages:
   download-weather-prev-years:
-    cmd: python airpollpredictor/download_weather.py --service_url http://127.0.0.1:8041 --params params.yaml --params_section download-weather-prev-years
+    cmd: python airpollpredictor/download_weather.py --output_file airpollpredictor/datasets/weather-source-data/weather_prev_years.csv --params params.yaml --params_section download-weather-prev-years
     deps:
       - airpollpredictor/download_weather.py
     params:
@@ -9,7 +9,7 @@ stages:
       - airpollpredictor/datasets/weather-source-data/weather_prev_years.csv
 
   download-weather-cur-year:
-    cmd: python airpollpredictor/download_weather.py --service_url http://127.0.0.1:8041 --params params.yaml --params_section download-weather-cur-year
+    cmd: python airpollpredictor/download_weather.py --output_file airpollpredictor/datasets/weather-source-data/weather_cur_year.csv  --params params.yaml --params_section download-weather-cur-year
     deps:
       - airpollpredictor/download_weather.py
     params:
@@ -18,7 +18,7 @@ stages:
       - airpollpredictor/datasets/weather-source-data/weather_cur_year.csv
 
   download-pollutants-prev-years:
-    cmd: python airpollpredictor/download_pollutants.py --service_url http://127.0.0.1:8040 --params params.yaml --params_section download-pollutants-prev-years
+    cmd: python airpollpredictor/download_pollutants.py --output_folder airpollpredictor/datasets/pollutants-source-data/prev_years --params params.yaml --params_section download-pollutants-prev-years
     deps:
       - airpollpredictor/download_pollutants.py
     params:
@@ -68,7 +68,7 @@ stages:
       - airpollpredictor/datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2022_timeseries.csv
 
   download-pollutants-cur-year:
-    cmd: python airpollpredictor/download_pollutants.py --service_url http://127.0.0.1:8040 --params params.yaml --params_section download-pollutants-cur-year
+    cmd: python airpollpredictor/download_pollutants.py --output_folder airpollpredictor/datasets/pollutants-source-data/cur_year --params params.yaml --params_section download-pollutants-cur-year
     deps:
       - airpollpredictor/download_pollutants.py
     params:
@@ -242,12 +242,29 @@ stages:
       - airpollpredictor/experiments_results/lgbm/6001/train.csv
       - airpollpredictor/experiments_results/lgbm/6001/val.csv
 
-  tune_model_lgbm_pm_25:
-    cmd: python airpollpredictor/tune_lgbm_model.py --input_train_file airpollpredictor/experiments_results/lgbm/6001/train.csv --input_val_file airpollpredictor/experiments_results/lgbm/6001/val.csv --output_metrics_file airpollpredictor/experiments_results/lgbm/6001/metrics.json --output_onnx_file airpollpredictor/experiments_results/lgbm/6001/model.onnx --params params.yaml --params_section lgbm_pm25 --mlflow_artifact lgbm_pm25_info
+#  tune_model_lgbm_pm_25:
+#    cmd: python airpollpredictor/tune_lgbm_model.py --input_train_file airpollpredictor/experiments_results/lgbm/6001/train.csv --input_val_file airpollpredictor/experiments_results/lgbm/6001/val.csv --output_metrics_file airpollpredictor/experiments_results/lgbm/6001/metrics.json --output_model_params_file airpollpredictor/experiments_results/lgbm/6001/model_params.json --output_onnx_file airpollpredictor/experiments_results/lgbm/6001/model.onnx --params params.yaml --params_section lgbm_pm25 #--mlflow_artifact lgbm_pm25_info
+#    deps:
+#      - airpollpredictor/tune_lgbm_model.py
+#    params:
+#      - lgbm_pm25
+#      - metric
+#      - optuna
+#    outs:
+#      # - lgbm_pm25_info
+#      - airpollpredictor/experiments_results/lgbm/6001/model.onnx
+#      - airpollpredictor/experiments_results/lgbm/6001/model_params.json
+#    metrics:
+#      - airpollpredictor/experiments_results/lgbm/6001/metrics.json
+
+  train_model_lgbm_pm_25:
+    cmd: python airpollpredictor/train_lgbm_model.py --input_train_file airpollpredictor/experiments_results/lgbm/6001/train.csv --input_val_file airpollpredictor/experiments_results/lgbm/6001/val.csv --input_model_params_file airpollpredictor/experiments_results/lgbm/6001/model_params.json --output_metrics_file airpollpredictor/experiments_results/lgbm/6001/metrics.json --output_onnx_file airpollpredictor/experiments_results/lgbm/6001/model.onnx --params params.yaml --params_section lgbm_pm25 #--mlflow_artifact lgbm_pm25_info
+    deps:
+      - airpollpredictor/experiments_results/lgbm/6001/model_params.json
+      - airpollpredictor/train_lgbm_model.py
     params:
       - lgbm_pm25
       - metric
-      - optuna
     outs:
       # - lgbm_pm25_info
       - airpollpredictor/experiments_results/lgbm/6001/model.onnx

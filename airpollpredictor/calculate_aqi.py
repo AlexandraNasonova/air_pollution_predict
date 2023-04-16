@@ -1,3 +1,6 @@
+"""
+DVC Stage calculate-aqi - calculates AQI fro loaded and cleaned data
+"""
 # pylint: disable=E0401
 
 from argparse import ArgumentParser
@@ -21,7 +24,9 @@ def __process_data(source_data_path: str, output_data_path: str, pollutants_code
 
 
 if __name__ == '__main__':
+    print(f'Stage {STAGE} started')
     stage_args = __parse_args()
     with open(stage_args.params, 'r', encoding='UTF-8') as file_stream:
         pollutant_codes = yaml.safe_load(file_stream)["pollutants-codes"]
     __process_data(stage_args.input_folder, stage_args.output_folder, pollutant_codes)
+    print(f'Stage {STAGE} finished')

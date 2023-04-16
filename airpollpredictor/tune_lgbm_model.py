@@ -1,65 +1,50 @@
-# pylint: disable=E0401
+"""
+DVC Stage tune_lgbm_model - find best LGBM model params using optuna
+"""
+# pylint: disable=E0401, R0913, W1514
+
 
 from argparse import ArgumentParser
-import pandas as pd
 import json
-import mlflow
-from mlflow.models.signature import infer_signature
-from mlflow.lightgbm import log_model
-import onnx
-from onnxmltools.convert import convert_lightgbm
-from skl2onnx.common.data_types import FloatTensorType
+import warnings
 from sklearn.model_selection import TimeSeriesSplit
+import pandas as pd
 import yaml
 from settings import settings
-import lgbm_tuner.columns_filter as col_filter
-import ml_tune_helpers.ts_splitter as ts_splitter
-from ml_tune_helpers.lgbm_optuna.optuna_lgb_search import OptunaLgbSearch
-import ml_tune_helpers.onnx_wrapper as onnx_wrapper
-import warnings
-warnings.filterwarnings('ignore')
+import data_preprocessing.columns_filter as col_filter
+from model_tune_helpers import ts_splitter
+from model_tune_helpers.lgbm_optuna.optuna_lgb_search import OptunaLgbSearch
+from model_tune_helpers import onnx_adapter
+from model_tune_helpers import metrics_adapter
 
+warnings.filterwarnings('ignore')
 
 STAGE = "tune_lgbm_model"
 
 
+# noinspection DuplicatedCode
 def __parse_args():
     parser = ArgumentParser(STAGE)
     parser.add_argument('--input_train_file', required=True, help='Path to input train data')
     parser.add_argument('--input_val_file', required=True, help='Path to input validation data')
     parser.add_argument('--output_metrics_file', required=True, help='Path to metrics file')
+    parser.add_argument('--output_model_params_file', required=True, help='Path to metrics file')
     parser.add_argument('--output_onnx_file', required=True, help='Path to onnx file')
     parser.add_argument('--params', required=True, help='Path to params')
     parser.add_argument('--params_section', required=True, help='Section with filter params')
-    parser.add_argument('--mlflow_artifact', required=True, help='MLFlow model artifacts path')
+    # parser.add_argument('--mlflow_artifact', required=True, help='MLFlow model artifacts path')
     return parser.parse_args()
 
 
-def __save_metrics(metrics_output_file_path: str, train_score: float, val_score: float,
-                   metric_name: str):
-    with open(metrics_output_file_path, 'w') as f_stream:
-        json.dump({
-            f'train_{metric_name}': train_score,
-            f'val_{metric_name}': val_score,
-        }, f_stream)
-
-
-def __send_model_to_ml_flow(x_train_df: pd.DataFrame, y_train_df: pd.DataFrame, model,
-                            train_score: float, val_score: float,
-                            artifact_path: str,
-                            metric_name: str, model_params_settings: dict,
-                            optuna_params_settings: dict):
-    signature = infer_signature(x_train_df, y_train_df)
-    with mlflow.start_run() as run:
-        log_model(lgb_model=model, signature=signature, artifact_path=artifact_path)
-        mlflow.log_metric(f'train_{metric_name}', train_score)
-        mlflow.log_metric(f'val_{metric_name}', val_score)
-        params = {"model_params": model_params_settings, "optuna_params": optuna_params_settings}
-        mlflow.log_params(params)
-
+def __save_model_params(model_params_output_file_path: str, model_params_to_save: dict):
+    with open(model_params_output_file_path, 'w') as f_stream:
+        json.dump(model_params_to_save, f_stream)
 
 
 if __name__ == '__main__':
+    print(f'Stage {STAGE} started')
+
+    # noinspection DuplicatedCode
     stage_args = __parse_args()
     with open(stage_args.params, 'r', encoding='UTF-8') as file_stream:
         yaml_params = yaml.safe_load(file_stream)
@@ -101,8 +86,9 @@ if __name__ == '__main__':
         cv_splitter=TimeSeriesSplit(optuna_params["cv_folders"]),
         warm_params=None)
 
-    print(f'----Optuna finished params tuning---')
+    print('----Optuna finished params tuning---')
 
+    # noinspection DuplicatedCode
     train_score_best, val_score_best, model_best = optuna_tuner.run_model_and_eval(
         params=optuna_tuner.study_best_params,
         categorical_features=optuna_tuner.study_best_params['categorical_features'],
@@ -112,12 +98,20 @@ if __name__ == '__main__':
     print(f'---Model trained with best params: '
           f'best_train_score: {train_score_best}, best_val_score: {val_score_best}')
 
-    __save_metrics(metrics_output_file_path=stage_args.output_metrics_file,
-                   train_score=train_score_best,
-                   val_score=val_score_best,
-                   metric_name=metric)
+    metrics_adapter.save_metrics_to_json(
+        metrics_file_path=stage_args.output_metrics_file,
+        train_score=train_score_best,
+        val_score=val_score_best,
+        metric_name=metric)
 
-    print(f'---Metrics saved locally---')
+    print('---Metrics saved locally---')
+
+    tuned_model_params = optuna_tuner.study_best_params
+    tuned_model_params['top_features_count'] = optuna_tuner.best_features_count
+    __save_model_params(model_params_output_file_path=stage_args.output_model_params_file,
+                        model_params_to_save=tuned_model_params)
+
+    print('---Model params saved locally---')
 
     # __send_model_to_ml_flow(x_train_df=x_train,
     #                         y_train_df=y_train,
@@ -131,7 +125,9 @@ if __name__ == '__main__':
 
     # print(f'---Model saved to MLFlow---')
 
-    onnx_wrapper.save_model(x_train_df=x_train, model=model_best,
+    onnx_adapter.save_model(x_train_df=x_train, model=model_best,
                             onnx_file_path=stage_args.output_onnx_file)
 
-    print(f'---Model saved to ONNX---')
+    print('---Model saved to ONNX---')
+
+    print(f'Stage {STAGE} finished')

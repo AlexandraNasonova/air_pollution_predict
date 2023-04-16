@@ -5,8 +5,8 @@ Module estimates AQI for cleaned pollutant data
 """
 import os
 import pandas as pd
-from .aqi_calculations import aqi_calculator as aqc
 from settings import settings
+from .aqi_calculations import aqi_calculator as aqc
 
 
 def calculate_aqi_indexes(source_data_path: str, pollutants_codes: [int]):

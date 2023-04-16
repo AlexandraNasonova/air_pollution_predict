@@ -1,9 +1,13 @@
+"""
+DVC Stage filter_columns_for_model - filters columns of the full datasets \
+and get only the ones required to the stage settings
+"""
 # pylint: disable=E0401
 
 from argparse import ArgumentParser
 import yaml
 import pandas as pd
-import lgbm_tuner.columns_filter as col_filter
+import data_preprocessing.columns_filter as col_filter
 from settings import settings
 
 STAGE = "filter_columns_for_model"
@@ -19,6 +23,8 @@ def __parse_args():
 
 
 if __name__ == '__main__':
+    print(f'Stage {STAGE} started')
+
     stage_args = __parse_args()
     with open(stage_args.params, 'r', encoding='UTF-8') as file_stream:
         model_params = yaml.safe_load(file_stream)[stage_args.params_section]
@@ -49,3 +55,4 @@ if __name__ == '__main__':
     )
 
     df_filtered.to_csv(stage_args.output_file)
+    print(f'Stage {STAGE} finished')
