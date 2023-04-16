@@ -1,0 +1,15 @@
+artifact_uri: s3://air-pol-mlflow-bucket/0/9b9994d7a5ef4ac98b2d76ff510eec64/artifacts
+end_time: 1681508253096
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 9b9994d7a5ef4ac98b2d76ff510eec64
+run_name: big-deer-874
+run_uuid: 9b9994d7a5ef4ac98b2d76ff510eec64
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1681508251366
+status: 4
+tags: []
+user_id: alexandra

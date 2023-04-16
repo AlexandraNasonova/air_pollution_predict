@@ -1,0 +1,15 @@
+artifact_uri: s3://air-pol-mlflow-bucket/0/98dcf69de4ee4138894857e9b384874e/artifacts
+end_time: 1681512421111
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 98dcf69de4ee4138894857e9b384874e
+run_name: shivering-whale-279
+run_uuid: 98dcf69de4ee4138894857e9b384874e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1681512419300
+status: 4
+tags: []
+user_id: alexandra
