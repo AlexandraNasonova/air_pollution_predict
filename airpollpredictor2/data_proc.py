@@ -12,7 +12,7 @@ drop_list = ['SamplingProcess', 'AveragingTime', 'DatetimeBegin', 'Validity', 'D
 
 ### data_proc function accepts filepath referring to csv file
 ### then reads it, processes the copy and returns a processed copy
-def data_proc(data) -> {Copy}:
+def data_proc(data):
     df = pd.read_csv(data, usecols=column_list , low_memory=True)
     print(f'Reading data')
     ### Convert pollutant names in main dataset to integer

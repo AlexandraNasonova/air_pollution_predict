@@ -2,6 +2,7 @@ import os
 from functools import reduce
 import pandas as pd
 import subindex_calc as sc
+import argparse
 
 ### constants
 pol_codes = [1, 5, 7, 8, 10, 6001]
@@ -15,8 +16,8 @@ def station_picker(df):
     station = df.groupby('AirQualityStation')['Concentration'].count().reset_index() \
         .sort_values(by='Concentration', ascending=False).head(1).reset_index()['AirQualityStation'][0]
     df_v1 = df[df['AirQualityStation'] == station].copy()
-    df_v1['DatetimeEnd'] = pd.to_datetime(df_v1['DatetimeEnd'], format="%Y-%m-%d %H:%M:%S")
-    return df_v1
+    df_v1['DatetimeEnd'] = pd.to_datetime(df_v1['DatetimeEnd'], format="%Y-%m-%d %H:%M:%S%z")
+    return df_v1, station
 
 ### Code to convert data into hourly timeseries format
 def create_timeseries(df):
@@ -97,13 +98,17 @@ def aqi(df):
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--inputfile", type=str, required=True, help="path to input data")
-    parser.add_argument("--outputfile", type=str, required=True, help="path to output data")
+    parser.add_argument("--outputfile", type=str, required=False, help="path to output data")
     args = parser.parse_args()
     df1 = pd.read_csv(args.inputfile, low_memory=False)
-    ts_aqi = aqi(create_timeseries(station_picker(df1)))
+    df1_station, station = station_picker(df1)
+    ts_aqi = aqi(create_timeseries(df1_station))
     ts_aqi2 = ts_aqi.copy().reset_index()
     os.chdir(os.getcwd())
-    ts_aqi2.to_csv(args.outputfile, index=False, encoding='utf-8-sig')
-
+    if args.outputfile:
+        ts_aqi2.to_csv(args.outputfile, index=False, encoding='utf-8-sig')
+        return
+    ts_aqi2.to_csv((station+'.csv'), index=False, encoding='utf-8-sig')
+    return
 if __name__ == "__main__":
     main()
