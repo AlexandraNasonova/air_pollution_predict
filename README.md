@@ -5,7 +5,7 @@
 
 ### Команда:
 - [Александра Насонова](https://github.com/AlexandraNasonova)
-- [Аделина Шамсутдинова](https://github.com/Adele-Kim)
+- [Адель Ким](https://github.com/Adele-Kim)
 
 ### Куратор:
 - Ксения Никитина
