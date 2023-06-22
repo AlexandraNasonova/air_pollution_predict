@@ -1,74 +1,124 @@
-pollutants-codes: &pol_codes [7, 6001, 5, 8]
-
-weather-features: &weather_columns ['tavg', 'tmin', 'tmax', 'prcp', 'wdir', 'wspd', 'wpgt', 'pres']
-
-date-features: &date_columns ['weekday', 'day', 'month', 'year', 'season', 'is_weekend', 'is_new_year']
-
+#pollutants-codes: &pol_codes [7, 6001, 5, 8]
+pollutants-codes:
+- 6001
+weather-features:
+- tavg
+- tmin
+- tmax
+- prcp
+- wdir
+- wspd
+- wpgt
+- pres
+date-features:
+- weekday
+- day
+- month
+- year
+- season
+- is_weekend
+- is_new_year
 period-settings:
   date_start_train: &date_start_train '2015-01-01'
   date_prev_years_end: &date_prev_years_end '2022-12-31'
-  date_end_val: &date_end_val '2023-02-12'
-
-  last_run_date: &last_run_date '2023-02-12'
   date_current_year_start: &date_current_year_start '2023-01-01'
-  current_date: &current_date '2023-04-14'
-  forecast_period: &forecast_period 3
+  current_date: &current_date '2023-06-17'
+  last_run_date: &last_run_date '2023-02-12'
 
 split_periods:
-  val_date_to: *date_end_val
-  forecast_period: *forecast_period
-  remove_days_at_start: 28
+  train_date_to: '2023-04-30'
+  #val_date_to: '2023-06-17'
+  val_date_to: '2023-05-17'
+  forecast_period: 7
+  remove_days_at_start: 90
 
 weather-station: &weather-station '06344'
 
-country-code: &country-code 'NL'
+country-code: &country-code NL
 
-city: &city 'Rotterdam'
+city: &city Rotterdam
 
 stations_per_pollutants: &stations_per_pollutants
-  '7': 'STA-NL00418'
-  '5': 'STA-NL00418'
-  '6001': 'STA-NL00448'
-  '8': 'STA-NL00418'
+#  '7': 'STA-NL00418'
+#  '5': 'STA-NL00418'
+  '6001': STA-NL00448
+#  '8': 'STA-NL00418'
 
 download-weather-cur-year:
-    station_id: *weather-station
-    date_from: *date_current_year_start
-    date_to: *current_date
+  station_id: *weather-station
+  date_from: *date_current_year_start
+  date_to: *current_date
 
 download-weather-prev-years:
-    station_id: *weather-station
-    date_from: *date_start_train
-    date_to: *date_prev_years_end
+  station_id: *weather-station
+  date_from: *date_start_train
+  date_to: *date_prev_years_end
 
 download-pollutants-cur-year:
-    country_code: *country-code
-    city: *city
-    stations_per_pollutants: *stations_per_pollutants
-    date_from: *date_current_year_start
-    date_to: *current_date
+  country_code: *country-code
+  city: *city
+  stations_per_pollutants: *stations_per_pollutants
+  date_from: *date_current_year_start
+  date_to: *current_date
 
 download-pollutants-prev-years:
-    country_code: *country-code
-    city: *city
-    stations_per_pollutants: *stations_per_pollutants
-    date_from: *date_start_train
-    date_to: *date_prev_years_end
-  
-enrich-pollutants: &enrich-pollutants
-  lags-shifts: [3, 4, 5, 6, 7, 8, 9, 10, 14, 21, 28]
-  filters: ['weekday', 'month']
-  windows_filters_aqi:
-    NoFilter: ['3D', '5D', '7D', '14D', '28D']
-    weekday: ['28D', '56D']
-    month: ['90D']
-  lag_agg_aqi: [3, 5, 7, 10, 14, 21, 28]
-  methods_agg_aqi: ['mean', 'median', 'percentile(10)', 'percentile(90)']
-  ewm_filters_aqi:
-    NoFilter: [3, 5, 7, 14, 21, 28]
-    weekday: [28, 56]
-    month: [90]
+  country_code: *country-code
+  city: *city
+  stations_per_pollutants: *stations_per_pollutants
+  date_from: *date_start_train
+  date_to: *date_prev_years_end
 
+outliers-aqi:
+  iqr_borders:
+    6001:
+    - 100
+    - 100
+enrich-pollutants: &enrich-pollutants
+  lags-shifts:
+  - 7
+  - 8
+  - 9
+  - 10
+  - 14
+  - 21
+  - 28
+  filters:
+  - weekday
+  - month
+  windows_filters_aqi:
+    NoFilter:
+    - 3D
+    - 5D
+    - 7D
+    - 14D
+    - 28D
+    weekday:
+    - 28D
+    - 56D
+    month:
+    - 90D
+  lag_agg_aqi:
+  - 7
+  - 10
+  - 14
+  - 21
+  - 28
+  methods_agg_aqi:
+  - mean
+  - median
+  - percentile(10)
+  - percentile(90)
+  ewm_filters_aqi:
+    NoFilter:
+    - 7
+    - 14
+    - 21
+    - 28
+    weekday:
+    - 28
+    - 56
+    month:
+    - 90
 enrich-pollutants-prev-years:
   params: *enrich-pollutants
   date_prev_from: *date_start_train
@@ -85,58 +135,95 @@ metric: &metric rmse
 
 optuna:
   objective: &objective regression
-  n_trials: 120
+  n_trials: 200
   n_jobs: 8
   cv_folders: 16
-  optimization_direction: 'minimize'
+  optimization_direction: minimize
 
 columns_filters_gen: &columns_filters_gen
-  use_aqi_cols: True
-  use_c_mean_cols: False
-  use_c_max_cols: False
-  use_c_median_cols: False
-  use_c_min_cols: False
-  use_pol_cols: False
-  use_lag_cols: True
-  use_gen_lags_cols: True
-  use_weather_cols: True
-  pollutants_codes: *pol_codes
-  weather_columns: *weather_columns
-  date_columns: *date_columns
-
+  use_aqi_cols: true
+  use_c_mean_cols: false
+  use_c_max_cols: false
+  use_c_median_cols: false
+  use_c_min_cols: false
+  use_pol_cols: false
+  use_lag_cols: false
+  use_gen_lags_cols: true
+  use_weather_cols: true
+  pollutants_codes:
+  - 6001
+  weather_columns:
+  - tavg
+  - tmin
+  - tmax
+  - prcp
+  - wdir
+  - wspd
+  - wpgt
+  - pres
+  date_columns:
+  - weekday
+  - day
+  - month
+  - year
+  - season
+  - is_weekend
+  - is_new_year
 lgbm_pm25:
+  exp_name: lgbm_pm25
+  run_name: outliers_no_gen_lags_no
   pol_id: 6001
-  categories: [
-    ['month', 'weekday'],
-    ['season', 'month'],
-    ['season', 'month', 'weekday']
-  ]
-  default_category: ['month', 'weekday']
-  search_category: True
+  categories:
+  - month
+  - weekday
+  default_category:
+  - month
+  - weekday
+  search_category: false
   default_top_features_count: 30
   default_params:
     n_jobs: -1
     verbosity: -1
     objective: *objective
     metric: *metric
-    boosting_type: 'gbdt'
-    extra_trees: False
+    boosting_type: gbdt
+    extra_trees: true
     n_estimators: 2100
-    num_leaves: 97
-    learning_rate: 0.11890042003021366
-    subsample: 0.4318782580934736
-    subsample_freq: 0
-    subsample_for_bin: 193295
-    min_child_samples: 14
-    reg_alpha: 0.394194026403052
-    reg_lambda: 0.708405421324422
-    max_depth: 3
-    max_bin: 206
-  prediction_value_type: 'AQI'
+    num_leaves: 100
+    learning_rate: 0.01
+    subsample: 0.7
+    subsample_freq: 5
+    subsample_for_bin: 100000
+    min_child_samples: 30
+    reg_alpha: 0.1
+    reg_lambda: 0.3
+    max_depth: 10
+    max_bin: 200
+  prediction_value_type: AQI
   columns_filters: *columns_filters_gen
+  columns_selected:
+  - AQI_PM25
+  - month
+  - weekday
+  - Wx
+  - Wy
+  - tmin
+  - prcp
 
-
-
-
-
-
+tft_pm25:
+  exp_name: tft_pm25
+  run_name: outliers_no
+  pol_id: 6001
+  default_category:
+  - month
+  - weekday
+  columns_selected:
+  - AQI_PM25
+  - Pollutant
+  - year
+  - month
+  - weekday
+  - Wx
+  - Wy
+  - tmin
+  - prcp

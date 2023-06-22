@@ -233,4 +233,7 @@ def generate_lagged_features(
                             bar.next()
                             # progress.value += 1
 
+    data_gen.reset_index(inplace=True)
+    data_gen[date_col] = pd.DatetimeIndex(data_gen[date_col])
+    data_gen.set_index(date_col, inplace=True, drop=True)
     return data_gen

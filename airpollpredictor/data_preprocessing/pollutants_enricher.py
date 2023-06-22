@@ -64,16 +64,16 @@ def calc_aqi_and_mean_concentration_and_merge(
     df_gen = pd.DataFrame(
         index=pd.date_range(start=date_from, end=date_end, freq='D',
                             inclusive="both", name=settings.DATE_COLUMN_NAME))
-    df_gen = __calc_aqi_per_pollutant_and_merge_pollutants(
-        source_data_path=source_data_path, pollutants_codes=pollutants_codes,
-        df_gen=df_gen)
-    # g['Pollutant'] = g.idxmax(axis=1).apply(lambda x: x[x.index('_') + 1:])
-    df_gen[settings.AQI_COLUMN_NAME] = df_gen.max(axis=1)
+    df_gen = __merge_pollutants(source_data_path=source_data_path,
+                                pollutants_codes=pollutants_codes,
+                                df_gen=df_gen)
     df_gen[settings.POLLUTANT_COLUMN_NAME] = df_gen.idxmax(axis=1) \
         .apply(lambda x: settings.POL_NAMES_REVERSE[x[x.index('_') + 1:]])
-    df_gen = __calc_mean_concentration_and_merge_pollutants(
-        source_data_path=source_data_path, pollutants_codes=pollutants_codes,
-        df_gen=df_gen)
+    df_gen[settings.AQI_COLUMN_NAME] = df_gen.max(axis=1)
+
+    # df_gen = __calc_mean_concentration_and_merge_pollutants(
+    #     source_data_path=source_data_path, pollutants_codes=pollutants_codes,
+    #     df_gen=df_gen)
     return df_gen
 
 
@@ -94,14 +94,15 @@ def __merge_column_by_index(pollutant_id: int, df_gen: pd.DataFrame, df_to_merge
     return df_gen
 
 
-def __calc_aqi_per_pollutant_and_merge_pollutants(
+def __merge_pollutants(
         source_data_path: str, pollutants_codes: list[int], df_gen: pd.DataFrame) -> pd.DataFrame:
     for pollutant_id in pollutants_codes:
         df_pollutant = __read_dataframe_for_pollutant(source_data_path, pollutant_id)
-        measure = settings.POL_MEASURES[pollutant_id]
-        df_pollutant_agg = aqc.calc_aqi_for_day_pd(
-            pollutant_id, df_pollutant, measure).tz_localize(None)
-        df_gen = __merge_column_by_index(pollutant_id, df_gen, df_pollutant_agg,
+        df_pollutant = df_pollutant.tz_localize(None)
+        # measure = settings.POL_MEASURES[pollutant_id]
+        # df_pollutant_agg = aqc.calc_aqi_for_day_pd(
+        #     pollutant_id, df_pollutant, measure).tz_localize(None)
+        df_gen = __merge_column_by_index(pollutant_id, df_gen, df_pollutant,
                                          settings.AQI_COLUMN_NAME)
     return df_gen
 
@@ -125,8 +126,8 @@ def __calc_mean_concentration_and_merge_pollutants(
 def __get_all_concentration_and_aqi_columns(pollutants_codes: list[int], df_gen: pd.DataFrame):
     return [col for col in df_gen.columns.values
             if [pol_code for pol_code in pollutants_codes
-                if col.endswith(settings.POL_NAMES[pol_code])]] \
-        + [settings.AQI_COLUMN_NAME] + [settings.POLLUTANT_COLUMN_NAME]
+                if col.endswith(settings.POL_NAMES[pol_code])]]
+        # + [settings.AQI_COLUMN_NAME] + [settings.POLLUTANT_COLUMN_NAME]
 
 
 def __get_aqi_columns(pollutants_codes: list[int], df_gen: pd.DataFrame):
@@ -134,7 +135,7 @@ def __get_aqi_columns(pollutants_codes: list[int], df_gen: pd.DataFrame):
             if col.startswith(settings.AQI_COLUMN_NAME) and
             [pol_code for pol_code in pollutants_codes
              if col.endswith(settings.POL_NAMES[pol_code])]] \
-        + [settings.AQI_COLUMN_NAME]
+        # + [settings.AQI_COLUMN_NAME]
 
 
 def __get_concentration_columns_by_method(pollutants_codes: list[int],
@@ -171,7 +172,7 @@ def __get_lag_data_aqi(pollutants_codes: list[int], df_gen: pd.DataFrame,
                                   dynamic_filters=filters,
                                   ewm_params=ewm_params
                                   )
-    df_lagged_features.set_index(settings.DATE_COLUMN_NAME, inplace=True)
+    # df_lagged_features.set_index(settings.DATE_COLUMN_NAME, inplace=True)
     return df_lagged_features
 
 

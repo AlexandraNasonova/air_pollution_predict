@@ -3,28 +3,10 @@
 Module for cleaning pollutant data
 """
 
-import glob
-import os
 import warnings
 import numpy as np
 import pandas as pd
 from settings import settings
-
-
-def get_merged_dataframes_per_pollutant(source_data_path: str, pollutants_codes: [int]):
-    """
-    Merges files for pollutants (all years to one file for every pollutant)
-    @param source_data_path: The path to the source pollutant data
-    @param pollutants_codes: The list of pollutant codes
-    @return: List of dataframes with merged for every pollutant data
-    """
-    df_list = []
-    for pol_id in pollutants_codes:
-        df_pol = pd.concat(map(lambda p: pd.read_csv(p, usecols=settings.POL_USE_COLUMNS),
-                               glob.glob(os.path.join(source_data_path, str(pol_id), "*.csv"))))
-        # print(f'Pollutant: {settings.POL_NAMES[pol_id] :10} Lines count: {df.shape[0]}')
-        df_list.append(df_pol)
-    return df_list
 
 
 def drop_sampling_unverified_duplicates(pollutants_codes: [int],
@@ -78,31 +60,6 @@ def remove_unused_columns(pollutants_codes: list[int],
         df_list[i] = df_list[i].drop(
             columns=['AirQualityStation', 'Verification', 'Validity', 'UnitOfMeasurement',
                      'AveragingTime', 'SamplingPoint', 'SamplingProcess', 'Countrycode'])
-
-
-def set_index(pollutants_codes: list[int], df_list: list[pd.DataFrame]):
-    """
-    Reset date index
-    @param pollutants_codes: The list of pollutant codes
-    @param df_list: List of dataframes with merged for every pollutant data
-    """
-    for i in range(len(pollutants_codes)):
-        df_list[i].set_index(settings.DATE_COLUMN_NAME, inplace=True)
-        df_list[i].sort_index(inplace=True)
-
-
-def save_clean_data(pollutants_codes: list[int], df_list: list[pd.DataFrame],
-                    output_path: str):
-    """
-    Saves clean data
-    @param pollutants_codes: The list of pollutant codes
-    @param df_list: List of dataframes with merged for every pollutant data
-    @param output_path: The output path
-    """
-    # pylint: disable=C0200
-    for i in range(len(pollutants_codes)):
-        file_path = os.path.join(output_path, f'{pollutants_codes[i]}.csv')
-        df_list[i].to_csv(file_path)
 
 
 def __get_hour_columns(df_days) -> pd.DataFrame:

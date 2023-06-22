@@ -2,10 +2,13 @@
 Constants used in data preprocessing
 """
 
+PREDICTION_VALUE_TYPES = ['AQI']
+
 POL_USE_COLUMNS = ['Countrycode', 'AirQualityStation', 'SamplingPoint',
                    'SamplingProcess', 'UnitOfMeasurement', 'Concentration',
                    'AveragingTime', 'DatetimeEnd', 'Validity', 'Verification']
 DATE_COLUMN_NAME = 'DatetimeEnd'
+
 CONCENTRATION_COLUMN_NAME = "Concentration"
 AQI_COLUMN_NAME = "AQI"
 POLLUTANT_COLUMN_NAME = 'Pollutant'
@@ -16,7 +19,6 @@ POL_MEASURES = {7: "µg/m3", 6001: "µg/m3", 5: "µg/m3", 10: "mg/m3", 1: "µg/m
 
 
 DATE_WEATHER_COLUMN_NAME = 'date'
-
 DATE_COLUMNS = ['weekday', 'day', 'month', 'year', 'season', 'is_weekend', 'is_new_year']
 WEATHER_COLUMNS = ['tavg', 'tmin', 'tmax', 'prcp', 'wdir', 'wspd', 'wpgt', 'pres']
 POL_CODES = [7, 6001, 5, 8]

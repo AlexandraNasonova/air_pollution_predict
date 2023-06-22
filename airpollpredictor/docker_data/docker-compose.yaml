@@ -1,0 +1,25 @@
+services:
+  mlflow:
+    restart: always
+    image: ghcr.io/mlflow/mlflow
+    ports:
+      - "${MLFLOW_PORT}:5000"
+    environment:
+      - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
+      - MLFLOW_S3_ENDPOINT_URL=${S3_URI}
+    depends_on:
+      - db
+    command: bash -c "pip install psycopg2-binary && pip install boto3 && mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB} --artifacts-destination ${S3_BUCKET} --serve-artifacts"
+
+  db:
+    restart: always
+    image: postgres
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ./docker/postgres-data:/var/lib/postgresql/data

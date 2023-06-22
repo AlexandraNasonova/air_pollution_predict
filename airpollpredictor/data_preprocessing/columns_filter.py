@@ -9,12 +9,12 @@ from settings import settings
 
 
 def get_target_column(prediction_value_type: str, pol_id: int = -1) -> str:
-    '''
+    """
     Returns target columns name
     @param prediction_value_type: Prediction value type (AQI / MEAN / MEDIAN / MAX / MIN)
     @param pol_id: The code of the pollutant
     @return: Target columns name
-    '''
+    """
     return prediction_value_type if pol_id <= 0 \
         else f'{prediction_value_type}_{settings.POL_NAMES[pol_id]}'
 
