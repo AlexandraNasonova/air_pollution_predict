@@ -7,6 +7,7 @@ import glob
 import os
 import pandas as pd
 from settings import settings
+from data_preprocessing.features_generations import ts_date_features_generator as date_gen
 
 
 def read_and_merge_prev_and_cur(pollutants_codes: [int],
@@ -75,6 +76,8 @@ def merge_dataframes_per_pollutant(source_data_path: str, pollutants_codes: [int
     """
     df_list = []
     for pol_id in pollutants_codes:
+        print("FFFFF")
+        print(settings.POL_USE_COLUMNS)
         df_pol = pd.concat(map(lambda p: pd.read_csv(p, usecols=settings.POL_USE_COLUMNS),
                                glob.glob(os.path.join(source_data_path, str(pol_id), "*.csv"))))
         # print(f'Pollutant: {settings.POL_NAMES[pol_id] :10} Lines count: {df.shape[0]}')
@@ -108,30 +111,73 @@ def save_datasets_per_pollutant(pollutants_codes: list[int],
         df_list[i].to_csv(file_path)
 
 
-def __read_and_merge_aqi_files(aqi_prev_years_file_path: str,
-                               aqi_cur_year_file_path: str):
-    """
-    Reads and merges AQI api previous and current years datasets
-    @param aqi_prev_years_file_path: The path to clean and enriched AQI data with prev_years
-    @param aqi_cur_year_file_path: The path to clean and enriched AQI data with cur_year
-    """
-    df_aqi_prev_years = pd.read_csv(aqi_prev_years_file_path,
-                                    index_col=settings.DATE_COLUMN_NAME,
-                                    parse_dates=True)
-    df_aqi_cur_year = pd.read_csv(aqi_cur_year_file_path,
-                                  index_col=settings.DATE_COLUMN_NAME,
-                                  parse_dates=True)
-    df_aqi = pd.concat([df_aqi_prev_years, df_aqi_cur_year])
-    return df_aqi
+def __merge_column_by_index(pollutant_id: int, df_gen: pd.DataFrame, df_to_merge: pd.DataFrame,
+                            source_column: str, new_column=None) -> pd.DataFrame:
+    if new_column is None:
+        new_column = source_column
+
+    df_gen = df_gen.merge(df_to_merge[source_column], left_index=True, right_index=True)
+    df_gen = df_gen.rename(
+        columns={source_column: f'{new_column}_{settings.POL_NAMES[pollutant_id]}'})
+    return df_gen
 
 
-def __read_and_merge_weather_files(weather_prev_years_file_path: str,
-                                   weather_cur_year_file_path: str):
+def __read_and_merge_pollutants(
+        source_data_path: str, pollutants_codes: list[int],
+        date_from: str, date_end: str) -> pd.DataFrame:
     """
-    Reads and merges weather api previous and current years datasets
+    Calculates mean concentrations and AQI, rollup lines from hours to days
+    @param source_data_path: The path to pollutant files
+    @param pollutants_codes: The list of pollutant codes
+    @param date_from: The first date of the data sources
+    @param date_end: The last date of the data sources
+    @return: Dataframe with AQI, mean concentrations, rolled up from hours to days
+    """
+    df_gen = pd.DataFrame(
+        index=pd.date_range(start=date_from, end=date_end, freq='D',
+                            inclusive="both", name=settings.DATE_COLUMN_NAME))
+
+    for pollutant_id in pollutants_codes:
+        df_pollutant = pd.read_csv(os.path.join(source_data_path, f'{pollutant_id}.csv'),
+                                   parse_dates=True, index_col=settings.DATE_COLUMN_NAME)
+        df_pollutant = df_pollutant.tz_localize(None)
+        df_gen = __merge_column_by_index(pollutant_id, df_gen, df_pollutant,
+                                         settings.AQI_COLUMN_NAME)
+
+    df_gen[settings.POLLUTANT_COLUMN_NAME] = df_gen.idxmax(axis=1) \
+        .apply(lambda x: settings.POL_NAMES_REVERSE[x[x.index('_') + 1:]])
+    # df_gen[settings.AQI_COLUMN_NAME] = df_gen.max(axis=1)
+    return df_gen
+
+
+def merge_and_save_aqi_per_pollutants_and_weather(
+        aqi_prev_years_path: str,
+        aqi_cur_year_path: str,
+        weather_prev_years_file_path: str,
+        weather_cur_year_file_path: str,
+        pollutants_codes: list[int],
+        date_prev_from: str, date_prev_end: str,
+        date_cur_from: str, date_cur_end: str,
+        output_file_path: str):
+    """
+    Merges AQI and weather data and saves result
+    @param aqi_prev_years_path: The path to clean AQI data with prev_years
+    @param aqi_cur_year_path: The path to clean AQI data with cur_year
     @param weather_prev_years_file_path: The path to clean weather data with prev_years
     @param weather_cur_year_file_path: The path to clean weather data with cur_year
+    @param pollutants_codes: The list of pollutant codes
+    @param date_prev_from: The first date of the data sources for previous years
+    @param date_prev_end: The last date of the data sources for a current year
+    @param date_cur_from: The first date of the data sources for previous years
+    @param date_cur_end: The last date of the data sources for a current year
+    @param output_file_path: The output file path
     """
+    df_aqi_prev = __read_and_merge_pollutants(aqi_prev_years_path, pollutants_codes,
+                                              date_prev_from, date_prev_end)
+    df_aqi_cur = __read_and_merge_pollutants(aqi_cur_year_path, pollutants_codes,
+                                             date_cur_from, date_cur_end)
+
+    df_aqi = pd.concat([df_aqi_prev, df_aqi_cur])
     df_weather_prev_years = pd.read_csv(weather_prev_years_file_path,
                                         index_col=settings.DATE_WEATHER_COLUMN_NAME,
                                         parse_dates=True)
@@ -139,14 +185,17 @@ def __read_and_merge_weather_files(weather_prev_years_file_path: str,
                                       index_col=settings.DATE_WEATHER_COLUMN_NAME,
                                       parse_dates=True)
     df_weather = pd.concat([df_weather_prev_years, df_weather_cur_year])
-    return df_weather
+    df_all = df_aqi.merge(df_weather, how='left', left_index=True,
+                          right_index=True)
+    df_all.to_csv(output_file_path)
 
 
-def merge_and_save_aqi_and_weather(aqi_prev_years_file_path: str,
-                                   aqi_cur_year_file_path: str,
-                                   weather_prev_years_file_path: str,
-                                   weather_cur_year_file_path: str,
-                                   output_file_path: str):
+def merge_and_save_aqi_enriched_and_weather(
+        aqi_prev_years_file_path: str,
+        aqi_cur_year_file_path: str,
+        weather_prev_years_file_path: str,
+        weather_cur_year_file_path: str,
+        output_file_path: str):
     """
     Merges AQI and weather data and saves result
     @param aqi_prev_years_file_path: The path to clean and enriched AQI data with prev_years
@@ -155,10 +204,22 @@ def merge_and_save_aqi_and_weather(aqi_prev_years_file_path: str,
     @param weather_cur_year_file_path: The path to clean weather data with cur_year
     @param output_file_path: The output file path
     """
-    df_aqi = __read_and_merge_aqi_files(aqi_prev_years_file_path,
-                                        aqi_cur_year_file_path)
-    df_weather = __read_and_merge_weather_files(weather_prev_years_file_path,
-                                                weather_cur_year_file_path)
-    df_all = df_aqi.merge(df_weather, how='left', left_index=True,
-                          right_index=True)
+    df_aqi_prev_years = pd.read_csv(aqi_prev_years_file_path,
+                                    index_col=settings.DATE_COLUMN_NAME,
+                                    parse_dates=True)
+    df_aqi_cur_year = pd.read_csv(aqi_cur_year_file_path,
+                                  index_col=settings.DATE_COLUMN_NAME,
+                                  parse_dates=True)
+    df_aqi = pd.concat([df_aqi_prev_years, df_aqi_cur_year])
+    df_weather_prev_years = pd.read_csv(weather_prev_years_file_path,
+                                        index_col=settings.DATE_WEATHER_COLUMN_NAME,
+                                        parse_dates=True)
+    df_weather_cur_year = pd.read_csv(weather_cur_year_file_path,
+                                      index_col=settings.DATE_WEATHER_COLUMN_NAME,
+                                      parse_dates=True)
+    df_weather = pd.concat([df_weather_prev_years, df_weather_cur_year])
+    df_all = df_weather.merge(df_aqi, how='left', left_index=True,
+                              right_index=True)
+    # df_all = date_gen.add_date_info(df_all)
+    df_all.index.name = settings.DATE_COLUMN_NAME
     df_all.to_csv(output_file_path)

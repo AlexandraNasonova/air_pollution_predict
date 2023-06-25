@@ -64,7 +64,7 @@ if __name__ == '__main__':
         date_cur_from_d = datetime.datetime.strptime(date_cur_from, "%Y-%m-%d").date()
         date_cut = (date_cur_from_d - datetime.timedelta(days=100)).strftime("%Y-%m-%d")
         df_aqi = df_aqi[date_cut:]
-        date_save_from = date_cur_from_d
+        date_save_from = datetime.datetime.strptime(date_cur_from, "%Y-%m-%d").date()
 
     df_aqi = pol_enrich.generate_features(df_aqi_mean=df_aqi,
                                           pollutants_codes=pollutants_codes,
@@ -75,6 +75,7 @@ if __name__ == '__main__':
                                           lags_agg_aqi=enrich_params["lag_agg_aqi"],
                                           ewm_filters_aqi=enrich_params["ewm_filters_aqi"]
                                           )
+
     df_aqi = df_aqi[date_save_from:]
     df_aqi.to_csv(stage_args.output_file)
 

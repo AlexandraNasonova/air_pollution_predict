@@ -1,0 +1,532 @@
+schema: '2.0'
+stages:
+  download-pollutants-prev-years:
+    cmd: python download_pollutants.py --output_folder ../../datasets/pollutants-source-data/prev_years
+      --params params.yaml --params_section download-pollutants-prev-years
+    deps:
+    - path: download_pollutants.py
+      md5: 51ced3e209148cfc2a2796f0b50d3be2
+      size: 1660
+    params:
+      params.yaml:
+        download-pollutants-prev-years:
+          country_code: NL
+          city: Rotterdam
+          stations_per_pollutants:
+            '6001': STA-NL00448
+          date_from: '2015-01-01'
+          date_to: '2022-12-31'
+    outs:
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2015_timeseries.csv
+      md5: 22fe5f0f183997def0f4e0a38e767620
+      size: 2315911
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2016_timeseries.csv
+      md5: 25ff483a6d839c81df26389b57399c94
+      size: 2320937
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2017_timeseries.csv
+      md5: 8e062b6f979917e6a7b25026b12caf94
+      size: 2313696
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2019_timeseries.csv
+      md5: fca82d3f14d999eddaab93298e08c03c
+      size: 2214296
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2020_timeseries.csv
+      md5: fbcb5529583181bee41be09031b8b744
+      size: 2189693
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2021_timeseries.csv
+      md5: fdf2b90c0ab0c49f1641e1f80da5fc10
+      size: 2215843
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2022_timeseries.csv
+      md5: 18d3e6f4b1b923f53218b43f0227fee0
+      size: 2228044
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_50425_2018_timeseries.csv
+      md5: d4aa77bd59f3969e8f084d1ff1e01e99
+      size: 2307489
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_50425_2019_timeseries.csv
+      md5: b1922057fa886b83ed2d45f382bdf769
+      size: 2304910
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_50425_2020_timeseries.csv
+      md5: 6f94b166cbca1390609bca7ce0bb7054
+      size: 2312703
+    - path: ../../datasets/pollutants-source-data/prev_years/urls/6001.txt
+      md5: 428dfa265b89e87203d7511f9ead9eef
+      size: 1033
+  download-pollutants-cur-year:
+    cmd: python download_pollutants.py --output_folder ../../datasets/pollutants-source-data/cur_year
+      --params params.yaml --params_section download-pollutants-cur-year
+    deps:
+    - path: download_pollutants.py
+      md5: 51ced3e209148cfc2a2796f0b50d3be2
+      size: 1660
+    params:
+      params.yaml:
+        download-pollutants-cur-year:
+          country_code: NL
+          city: Rotterdam
+          stations_per_pollutants:
+            '6001': STA-NL00448
+          date_from: '2023-01-01'
+          date_to: '2023-06-17'
+    outs:
+    - path: ../../datasets/pollutants-source-data/cur_year/6001/NL_6001_28131_2023_timeseries.csv
+      md5: 50f23c6ca0d01868d23da710a1e82d48
+      size: 1038512
+    - path: ../../datasets/pollutants-source-data/cur_year/urls/6001.txt
+      md5: f5a8934d7d89adf6c676bcdc3b25cf00
+      size: 98
+  clean-pollutants-cur-year:
+    cmd: python clean_pollutants.py --input_folder ../../datasets/pollutants-source-data/cur_year/
+      --output_folder ../../datasets/pollutants-clean-data/cur_year/ --params params.yaml
+    deps:
+    - path: ../../datasets/pollutants-source-data/cur_year/6001/NL_6001_28131_2023_timeseries.csv
+      md5: 50f23c6ca0d01868d23da710a1e82d48
+      size: 1038512
+    - path: clean_pollutants.py
+      md5: 21c77ce4ebc80281c86d540dfeb6e74d
+      size: 1623
+    params:
+      params.yaml:
+        pollutants-codes:
+        - 6001
+    outs:
+    - path: ../../datasets/pollutants-clean-data/cur_year/6001.csv
+      md5: a48374ae5b14b39584586c88f4254d9a
+      size: 125803
+  clean-pollutants-prev-years:
+    cmd: python clean_pollutants.py --input_folder ../../datasets/pollutants-source-data/prev_years/
+      --output_folder ../../datasets/pollutants-clean-data/prev_years/ --params params.yaml
+    deps:
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2015_timeseries.csv
+      md5: 22fe5f0f183997def0f4e0a38e767620
+      size: 2315911
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2016_timeseries.csv
+      md5: 25ff483a6d839c81df26389b57399c94
+      size: 2320937
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2017_timeseries.csv
+      md5: 8e062b6f979917e6a7b25026b12caf94
+      size: 2313696
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2019_timeseries.csv
+      md5: fca82d3f14d999eddaab93298e08c03c
+      size: 2214296
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2020_timeseries.csv
+      md5: fbcb5529583181bee41be09031b8b744
+      size: 2189693
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2021_timeseries.csv
+      md5: fdf2b90c0ab0c49f1641e1f80da5fc10
+      size: 2215843
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_28131_2022_timeseries.csv
+      md5: 5a95c766cb7f05d681a05607716df59f
+      size: 2166148
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_50425_2018_timeseries.csv
+      md5: d4aa77bd59f3969e8f084d1ff1e01e99
+      size: 2307489
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_50425_2019_timeseries.csv
+      md5: b1922057fa886b83ed2d45f382bdf769
+      size: 2304910
+    - path: ../../datasets/pollutants-source-data/prev_years/6001/NL_6001_50425_2020_timeseries.csv
+      md5: 6f94b166cbca1390609bca7ce0bb7054
+      size: 2312703
+    - path: clean_pollutants.py
+      md5: 21c77ce4ebc80281c86d540dfeb6e74d
+      size: 1623
+    params:
+      params.yaml:
+        pollutants-codes:
+        - 6001
+    outs:
+    - path: ../../datasets/pollutants-clean-data/prev_years/6001.csv
+      md5: 0100196c7d43f0d3bcf1fc3bc1f77d89
+      size: 2388507
+  calculate-aqi-prev-years:
+    cmd: python calculate_aqi.py --input_folder_prev ../../datasets/pollutants-clean-data/prev_years
+      --output_folder ../../datasets/pollutants-aqi-data/prev_years --params params.yaml
+    deps:
+    - path: ../../datasets/pollutants-clean-data/prev_years/6001.csv
+      md5: 0100196c7d43f0d3bcf1fc3bc1f77d89
+      size: 2388507
+    - path: calculate_aqi.py
+      md5: 999b4bb7798591cf690975e5247b76bf
+      size: 1719
+    params:
+      params.yaml:
+        pollutants-codes:
+        - 6001
+    outs:
+    - path: ../../datasets/pollutants-aqi-data/prev_years/6001.csv
+      md5: 14a2e838ed0f524c1bd1216f502f8c7d
+      size: 84771
+  calculate-aqi-cur-year:
+    cmd: python calculate_aqi.py --input_folder_prev ../../datasets/pollutants-clean-data/prev_years
+      --input_folder_cur ../../datasets/pollutants-clean-data/cur_year --output_folder
+      ../../datasets/pollutants-aqi-data/cur_year --params params.yaml
+    deps:
+    - path: ../../datasets/pollutants-clean-data/cur_year/6001.csv
+      md5: a48374ae5b14b39584586c88f4254d9a
+      size: 125803
+    - path: ../../datasets/pollutants-clean-data/prev_years/6001.csv
+      md5: 0100196c7d43f0d3bcf1fc3bc1f77d89
+      size: 2388507
+    - path: calculate_aqi.py
+      md5: 999b4bb7798591cf690975e5247b76bf
+      size: 1719
+    params:
+      params.yaml:
+        pollutants-codes:
+        - 6001
+    outs:
+    - path: ../../datasets/pollutants-aqi-data/cur_year/6001.csv
+      md5: 626c22db438999552902437ed7adfd10
+      size: 5092
+  outliers-aqi-cur-year:
+    cmd: python interpolate_target_outliers.py --input_folder_prev ../../datasets/pollutants-aqi-data/prev_years
+      --input_folder_cur ../../datasets/pollutants-aqi-data/cur_year --output_folder
+      ../../datasets/pollutants-aqi-no-outliers-data/cur_year --params params.yaml
+    deps:
+    - path: ../../datasets/pollutants-aqi-data/cur_year/6001.csv
+      md5: 626c22db438999552902437ed7adfd10
+      size: 5092
+    - path: ../../datasets/pollutants-aqi-data/prev_years/6001.csv
+      md5: 14a2e838ed0f524c1bd1216f502f8c7d
+      size: 84771
+    - path: interpolate_target_outliers.py
+      md5: 7caf5f3dc45e0feb972996de8769e06a
+      size: 1848
+    params:
+      params.yaml:
+        outliers-aqi:
+          iqr_borders:
+            6001:
+            - 100
+            - 100
+        period-settings:
+          date_start_train: '2015-01-01'
+          date_prev_years_end: '2022-12-31'
+          date_current_year_start: '2023-01-01'
+          current_date: '2023-06-17'
+          last_run_date: '2023-02-12'
+        pollutants-codes:
+        - 6001
+    outs:
+    - path: ../../datasets/pollutants-aqi-no-outliers-data/cur_year/6001.csv
+      md5: 626c22db438999552902437ed7adfd10
+      size: 5092
+  outliers-aqi-prev-years:
+    cmd: python interpolate_target_outliers.py --input_folder_prev ../../datasets/pollutants-aqi-data/prev_years
+      --output_folder ../../datasets/pollutants-aqi-no-outliers-data/prev_years --params
+      params.yaml
+    deps:
+    - path: ../../datasets/pollutants-aqi-data/prev_years/6001.csv
+      md5: 14a2e838ed0f524c1bd1216f502f8c7d
+      size: 84771
+    - path: interpolate_target_outliers.py
+      md5: 7caf5f3dc45e0feb972996de8769e06a
+      size: 1848
+    params:
+      params.yaml:
+        pollutants-codes:
+        - 6001
+    outs:
+    - path: ../../datasets/pollutants-aqi-no-outliers-data/prev_years/6001.csv
+      md5: 14a2e838ed0f524c1bd1216f502f8c7d
+      size: 84771
+  merge_weather:
+    cmd: python merge_weather.py --input_weather_prev_years_file ../../datasets/weather-clean-data/weather_prev_years.csv
+      --input_weather_cur_year_file ../../datasets/weather-clean-data/weather_cur_year.csv
+      --input_aqi_prev_years_folder ../../datasets/pollutants-aqi-no-outliers-data/prev_years/
+      --input_aqi_cur_year_folder ../../datasets/pollutants-aqi-no-outliers-data/cur_year/
+      --output_file ../../datasets/pollutants-weather-merged-data/aqi_all.csv --params
+      params.yaml
+    deps:
+    - path: ../../datasets/pollutants-aqi-no-outliers-data/cur_year/6001.csv
+      md5: f321b748e412b69e20984672ab31b04a
+      size: 5063
+    - path: ../../datasets/pollutants-aqi-no-outliers-data/prev_years/6001.csv
+      md5: 62805a0cb5d222c5d7886c448e8caa44
+      size: 84742
+    - path: ../../datasets/weather-clean-data/weather_cur_year.csv
+      md5: a0b0a2e82093a10566dc4a19e3ee1595
+      size: 19317
+    - path: ../../datasets/weather-clean-data/weather_prev_years.csv
+      md5: 51da348ade83b28a04c30bf9d9a94877
+      size: 278086
+    - path: merge_weather.py
+      md5: bc611e9d81eebaf7c1f3e3251cb6d76d
+      size: 2049
+    params:
+      params.yaml:
+        period-settings:
+          date_start_train: '2015-01-01'
+          date_prev_years_end: '2022-12-31'
+          date_current_year_start: '2023-01-01'
+          current_date: '2023-06-17'
+          last_run_date: '2023-02-12'
+        pollutants-codes:
+        - 6001
+    outs:
+    - path: ../../datasets/pollutants-weather-merged-data/aqi_all.csv
+      md5: 04e281dec1eab89625c1b0d0d32d68b6
+      size: 320908
+  enrich-pollutants-prev-years:
+    cmd: python enrich_pollutants.py --input_prev_years_folder ../../datasets/pollutants-aqi-no-outliers-data/prev_years/
+      --output_file ../../datasets/pollutants-enrich-data/aqi_enriched_prev_years.csv
+      --params params.yaml --params_section enrich-pollutants-prev-years
+    deps:
+    - path: ../../datasets/pollutants-aqi-no-outliers-data/prev_years/6001.csv
+      md5: 14a2e838ed0f524c1bd1216f502f8c7d
+      size: 84771
+    - path: enrich_pollutants.py
+      md5: 9224767011503e37b6584aa7013ae93e
+      size: 3356
+    params:
+      params.yaml:
+        enrich-pollutants-prev-years:
+          params:
+            lags-shifts:
+            - 7
+            - 8
+            - 9
+            - 10
+            - 14
+            - 21
+            - 28
+            filters:
+            - weekday
+            - month
+            windows_filters_aqi:
+              NoFilter:
+              - 3D
+              - 5D
+              - 7D
+              - 14D
+              - 28D
+              weekday:
+              - 28D
+              - 56D
+              month:
+              - 90D
+            lag_agg_aqi:
+            - 7
+            - 10
+            - 14
+            - 21
+            - 28
+            methods_agg_aqi:
+            - mean
+            - median
+            - percentile(10)
+            - percentile(90)
+            ewm_filters_aqi:
+              NoFilter:
+              - 7
+              - 14
+              - 21
+              - 28
+              weekday:
+              - 28
+              - 56
+              month:
+              - 90
+          date_prev_from: '2015-01-01'
+          date_prev_to: '2022-12-31'
+        pollutants-codes:
+        - 6001
+    outs:
+    - path: ../../datasets/pollutants-enrich-data/aqi_enriched_prev_years.csv
+      md5: e0b0b6663a6175454805bfbb99444308
+      size: 5035803
+  enrich-pollutants-cur-year:
+    cmd: python enrich_pollutants.py --input_cur_year_folder ../../datasets/pollutants-aqi-no-outliers-data/cur_year/
+      --input_prev_years_folder ../../datasets/pollutants-aqi-no-outliers-data/prev_years/
+      --output_file ../../datasets/pollutants-enrich-data/aqi_enriched_cur_year.csv
+      --params params.yaml --params_section enrich-pollutants-cur-year
+    deps:
+    - path: ../../datasets/pollutants-aqi-no-outliers-data/cur_year/6001.csv
+      md5: 626c22db438999552902437ed7adfd10
+      size: 5092
+    - path: ../../datasets/pollutants-aqi-no-outliers-data/prev_years/6001.csv
+      md5: 14a2e838ed0f524c1bd1216f502f8c7d
+      size: 84771
+    - path: enrich_pollutants.py
+      md5: 9224767011503e37b6584aa7013ae93e
+      size: 3356
+    params:
+      params.yaml:
+        enrich-pollutants-cur-year:
+          params:
+            lags-shifts:
+            - 7
+            - 8
+            - 9
+            - 10
+            - 14
+            - 21
+            - 28
+            filters:
+            - weekday
+            - month
+            windows_filters_aqi:
+              NoFilter:
+              - 3D
+              - 5D
+              - 7D
+              - 14D
+              - 28D
+              weekday:
+              - 28D
+              - 56D
+              month:
+              - 90D
+            lag_agg_aqi:
+            - 7
+            - 10
+            - 14
+            - 21
+            - 28
+            methods_agg_aqi:
+            - mean
+            - median
+            - percentile(10)
+            - percentile(90)
+            ewm_filters_aqi:
+              NoFilter:
+              - 7
+              - 14
+              - 21
+              - 28
+              weekday:
+              - 28
+              - 56
+              month:
+              - 90
+          date_prev_from: '2015-01-01'
+          date_prev_to: '2022-12-31'
+          date_cur_from: '2023-01-01'
+          date_cur_to: '2023-06-17'
+        pollutants-codes:
+        - 6001
+    outs:
+    - path: ../../datasets/pollutants-enrich-data/aqi_enriched_cur_year.csv
+      md5: 2b5c24654d7db97c5fcb092f5b507252
+      size: 311016
+  merge_enriched_weather:
+    cmd: python merge_enriched_weather.py --input_weather_prev_years_file ../../datasets/weather-clean-data/weather_prev_years.csv
+      --input_weather_cur_year_file ../../datasets/weather-clean-data/weather_cur_year.csv
+      --input_aqi_prev_years_file ../../datasets/pollutants-enrich-data/aqi_enriched_prev_years.csv
+      --input_aqi_cur_year_file ../../datasets/pollutants-enrich-data/aqi_enriched_cur_year.csv
+      --output_file ../../datasets/pollutants-weather-merged-data/aqi_all.csv --params
+      params.yaml
+    deps:
+    - path: ../../datasets/pollutants-enrich-data/aqi_enriched_cur_year.csv
+      md5: 2b5c24654d7db97c5fcb092f5b507252
+      size: 311016
+    - path: ../../datasets/pollutants-enrich-data/aqi_enriched_prev_years.csv
+      md5: e0b0b6663a6175454805bfbb99444308
+      size: 5035803
+    - path: ../../datasets/weather-clean-data/weather_cur_year.csv
+      md5: a0b0a2e82093a10566dc4a19e3ee1595
+      size: 19317
+    - path: ../../datasets/weather-clean-data/weather_prev_years.csv
+      md5: 2b8caa6e88ce329a2715f14d2b9a6326
+      size: 278092
+    - path: merge_enriched_weather.py
+      md5: ed40f8a02edc4291b688c75e6554b676
+      size: 1576
+    params:
+      params.yaml:
+        period-settings:
+          date_start_train: '2015-01-01'
+          date_prev_years_end: '2022-12-31'
+          date_current_year_start: '2023-01-01'
+          current_date: '2023-06-17'
+          last_run_date: '2023-02-12'
+        pollutants-codes:
+        - 6001
+    outs:
+    - path: ../../datasets/pollutants-weather-merged-data/aqi_all.csv
+      md5: 3ec9461312b71a0cb3e0d4f0720090dd
+      size: 5493507
+  download-weather-prev-years:
+    cmd: python download_weather.py --output_file ../../datasets/weather-source-data/weather_prev_years.csv
+      --params params.yaml --params_section download-weather-prev-years
+    deps:
+    - path: download_weather.py
+      md5: 1ee85f42677426374d2d42d6821f2cb9
+      size: 1326
+    params:
+      params.yaml:
+        download-weather-prev-years:
+          station_id: '06344'
+          date_from: '2015-01-01'
+          date_to: '2022-12-31'
+    outs:
+    - path: ../../datasets/weather-source-data/weather_prev_years.csv
+      md5: 5b1584851d417660ccc7f39f10adce08
+      size: 141092
+  clean-weather-prev-years:
+    cmd: python clean_weather.py --input_file ../../datasets/weather-source-data/weather_prev_years.csv
+      --output_file ../../datasets/weather-clean-data/weather_prev_years.csv --params
+      params.yaml
+    deps:
+    - path: ../../datasets/weather-source-data/weather_prev_years.csv
+      md5: 5b1584851d417660ccc7f39f10adce08
+      size: 141092
+    - path: clean_weather.py
+      md5: ef676b773e4eaacf16d36955a8df4205
+      size: 1168
+    params:
+      params.yaml:
+        weather-features:
+        - tavg
+        - tmin
+        - tmax
+        - prcp
+        - wdir
+        - wspd
+        - wpgt
+        - pres
+    outs:
+    - path: ../../datasets/weather-clean-data/weather_prev_years.csv
+      md5: 2b8caa6e88ce329a2715f14d2b9a6326
+      size: 278092
+  download-weather-cur-year:
+    cmd: python download_weather.py --output_file ../../datasets/weather-source-data/weather_cur_year.csv  --params
+      params.yaml --params_section download-weather-cur-year
+    deps:
+    - path: download_weather.py
+      md5: 1ee85f42677426374d2d42d6821f2cb9
+      size: 1326
+    params:
+      params.yaml:
+        download-weather-cur-year:
+          station_id: '06344'
+          date_from: '2023-01-01'
+          date_to: '2023-06-17'
+    outs:
+    - path: ../../datasets/weather-source-data/weather_cur_year.csv
+      md5: 843fba2a74885ec79784ccb49b1f77da
+      size: 8886
+  clean-weather-cur-year:
+    cmd: python clean_weather.py --input_file ../../datasets/weather-source-data/weather_cur_year.csv
+      --output_file ../../datasets/weather-clean-data/weather_cur_year.csv --params
+      params.yaml
+    deps:
+    - path: ../../datasets/weather-source-data/weather_cur_year.csv
+      md5: 843fba2a74885ec79784ccb49b1f77da
+      size: 8886
+    - path: clean_weather.py
+      md5: ef676b773e4eaacf16d36955a8df4205
+      size: 1168
+    params:
+      params.yaml:
+        weather-features:
+        - tavg
+        - tmin
+        - tmax
+        - prcp
+        - wdir
+        - wspd
+        - wpgt
+        - pres
+    outs:
+    - path: ../../datasets/weather-clean-data/weather_cur_year.csv
+      md5: a0b0a2e82093a10566dc4a19e3ee1595
+      size: 19317

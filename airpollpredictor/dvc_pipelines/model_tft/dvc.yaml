@@ -1,0 +1,17 @@
+stages:
+  tune_model_tft_pm_25:
+    cmd: python tune_tft_model.py --input_file  ../../datasets/pollutants-weather-merged-data/aqi_all.csv --output_metrics_file ../../experiments_results/tft/6001/metrics.json --output_checkpoint_file ../../experiments_results/tft/6001/model.ckpt --mlflow_env_file ../../docker_data/env_variables.env --params params.yaml --params_section tft_pm25
+    deps:
+      -  ../../datasets/pollutants-weather-merged-data/aqi_all.csv
+
+      - tune_tft_model.py
+    params:
+      - tft_pm25
+      - metric
+    outs:
+      # - lgbm_pm25_info
+      - ../../experiments_results/tft/6001/model.ckpt
+      # - ../../experiments_results/tft/6001/model_params.json
+    metrics:
+      - ../../experiments_results/tft/6001/metrics.json
+

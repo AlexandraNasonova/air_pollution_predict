@@ -57,6 +57,7 @@ def fill_nan(df: pd.DataFrame):
     """
     df['prcp'].fillna(0, inplace=True)
     df['tmin'] = df['tmin'].interpolate(method='time')
+    df['tmin'].fillna(0, inplace=True)
     df['Wx'].fillna(0, inplace=True)
     df['Wy'].fillna(0, inplace=True)
     df['pres'].fillna(0, inplace=True)

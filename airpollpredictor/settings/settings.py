@@ -8,6 +8,7 @@ POL_USE_COLUMNS = ['Countrycode', 'AirQualityStation', 'SamplingPoint',
                    'SamplingProcess', 'UnitOfMeasurement', 'Concentration',
                    'AveragingTime', 'DatetimeEnd', 'Validity', 'Verification']
 DATE_COLUMN_NAME = 'DatetimeEnd'
+DATE_COLUMN_NUM_IND_NAME = 'date_idx'
 
 CONCENTRATION_COLUMN_NAME = "Concentration"
 AQI_COLUMN_NAME = "AQI"

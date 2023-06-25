@@ -1,0 +1,54 @@
+#pollutants-codes: &pol_codes [7, 6001, 5, 8]
+period-settings:
+  date_start_train: &date_start_train '2015-01-01'
+  date_prev_years_end: &date_prev_years_end '2022-12-31'
+  date_current_year_start: &date_current_year_start '2023-01-01'
+  current_date: &current_date '2023-06-17'
+  last_run_date: &last_run_date '2023-02-12'
+
+split_periods:
+#  train_date_to: '2023-04-30'
+  #val_date_to: '2023-06-17'
+  val_date_to: '2023-05-17'
+  forecast_period: &forecast_period 7
+  remove_days_at_start: 90
+
+metric: &metric rmse
+
+tft_pm25:
+  exp_name: tft_pm25
+  run_name: outliers_no
+  pol_id: 6001
+  prediction_value_type: AQI
+
+  dataset_params:
+    max_prediction_length: *forecast_period
+    max_encoder_length: 28
+    batch_size: 64
+    group_ids:
+      - Pollutant
+    static_reals:
+      - year
+    time_varying_known_categoricals:
+      - month
+      - weekday
+    time_varying_known_reals:
+      - Wx
+      - Wy
+      - tmin
+      - prcp
+
+  trainer_params:
+      max_epochs: 50
+      gradient_clip_val: 0.1
+      limit_train_batches: 50
+
+  tft_params:
+      learning_rate: 0.1
+      hidden_size: 16
+      attention_head_size: 2
+      dropout: 0.1
+      hidden_continuous_size: 8
+      log_interval: 10
+      optimizer: Ranger
+      reduce_on_plateau_patience: 4

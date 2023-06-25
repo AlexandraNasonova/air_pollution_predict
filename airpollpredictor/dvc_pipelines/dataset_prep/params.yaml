@@ -1,0 +1,127 @@
+#pollutants-codes: &pol_codes [7, 6001, 5, 8]
+pollutants-codes:
+- 6001
+weather-features:
+- tavg
+- tmin
+- tmax
+- prcp
+- wdir
+- wspd
+- wpgt
+- pres
+date-features:
+- weekday
+- day
+- month
+- year
+- season
+- is_weekend
+- is_new_year
+
+period-settings:
+  date_start_train: &date_start_train '2015-01-01'
+  date_prev_years_end: &date_prev_years_end '2022-12-31'
+  date_current_year_start: &date_current_year_start '2023-01-01'
+  current_date: &current_date '2023-06-17'
+  last_run_date: &last_run_date '2023-02-12'
+
+weather-station: &weather-station '06344'
+
+country-code: &country-code NL
+
+city: &city Rotterdam
+
+stations_per_pollutants: &stations_per_pollutants
+#  '7': 'STA-NL00418'
+#  '5': 'STA-NL00418'
+  '6001': STA-NL00448
+#  '8': 'STA-NL00418'
+
+download-weather-cur-year:
+  station_id: *weather-station
+  date_from: *date_current_year_start
+  date_to: *current_date
+
+download-weather-prev-years:
+  station_id: *weather-station
+  date_from: *date_start_train
+  date_to: *date_prev_years_end
+
+download-pollutants-cur-year:
+  country_code: *country-code
+  city: *city
+  stations_per_pollutants: *stations_per_pollutants
+  date_from: *date_current_year_start
+  date_to: *current_date
+
+download-pollutants-prev-years:
+  country_code: *country-code
+  city: *city
+  stations_per_pollutants: *stations_per_pollutants
+  date_from: *date_start_train
+  date_to: *date_prev_years_end
+
+outliers-aqi:
+  iqr_borders:
+    6001:
+    - 100
+    - 100
+
+enrich-pollutants: &enrich-pollutants
+  lags-shifts:
+  - 7
+  - 8
+  - 9
+  - 10
+  - 14
+  - 21
+  - 28
+  filters:
+  - weekday
+  - month
+  windows_filters_aqi:
+    NoFilter:
+    - 3D
+    - 5D
+    - 7D
+    - 14D
+    - 28D
+    weekday:
+    - 28D
+    - 56D
+    month:
+    - 90D
+  lag_agg_aqi:
+  - 7
+  - 10
+  - 14
+  - 21
+  - 28
+  methods_agg_aqi:
+  - mean
+  - median
+  - percentile(10)
+  - percentile(90)
+  ewm_filters_aqi:
+    NoFilter:
+    - 7
+    - 14
+    - 21
+    - 28
+    weekday:
+    - 28
+    - 56
+    month:
+    - 90
+enrich-pollutants-prev-years:
+  params: *enrich-pollutants
+  date_prev_from: *date_start_train
+  date_prev_to: *date_prev_years_end
+
+enrich-pollutants-cur-year:
+  params: *enrich-pollutants
+  date_prev_from: *date_start_train
+  date_prev_to: *date_prev_years_end
+  date_cur_from: *date_current_year_start
+  date_cur_to: *current_date

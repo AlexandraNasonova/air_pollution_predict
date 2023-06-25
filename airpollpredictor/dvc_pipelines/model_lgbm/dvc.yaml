@@ -1,0 +1,57 @@
+stages:
+
+  filter_columns_lgbm_pm_25:
+    cmd: python filter_columns_for_model.py --input_file ../../datasets/pollutants-genlags-weather-merged-data/aqi_all.csv --output_file ../../experiments_results/lgbm/6001/aqi_filtered.csv --params params.yaml --params_section lgbm_pm25
+    deps:
+      - ../../datasets/pollutants-genlags-weather-merged-data/aqi_all.csv
+      - filter_columns_for_model.py
+    params:
+      - lgbm_pm25
+      - columns_filters_gen
+    outs:
+      - ../../experiments_results/lgbm/6001/aqi_filtered.csv
+
+  split_train_val_lgbm_pm_25:
+    cmd: python split_train_val.py --input_file ../../experiments_results/lgbm/6001/aqi_filtered.csv --output_train_file ../../experiments_results/lgbm/6001/train.csv --output_val_file ../../experiments_results/lgbm/6001/val.csv --params params.yaml
+    deps:
+      - ../../experiments_results/lgbm/6001/aqi_filtered.csv
+
+      - split_train_val.py
+    params:
+      - split_periods
+    outs:
+      - ../../experiments_results/lgbm/6001/train.csv
+      - ../../experiments_results/lgbm/6001/val.csv
+
+
+  tune_model_lgbm_pm_25:
+    cmd: python tune_lgbm_model.py --input_train_file ../../experiments_results/lgbm/6001/train.csv --input_val_file ../../experiments_results/lgbm/6001/val.csv --output_metrics_file ../../experiments_results/lgbm/6001/metrics.json --output_model_params_file ../../experiments_results/lgbm/6001/model_params.json --output_onnx_file ../../experiments_results/lgbm/6001/model.onnx --mlflow_env_file ../../docker_data/env_variables.env --params params.yaml --params_section lgbm_pm25 #--mlflow_artifact lgbm_pm25_info
+    deps:
+      - ../../experiments_results/lgbm/6001/train.csv
+      - ../../experiments_results/lgbm/6001/val.csv
+
+      - tune_lgbm_model.py
+    params:
+      - lgbm_pm25
+      - metric
+      - optuna
+    outs:
+      # - lgbm_pm25_info
+      - ../../experiments_results/lgbm/6001/model.onnx
+      # - airpollpredictor/experiments_results/lgbm/6001/model_params.json
+    metrics:
+      - ../../experiments_results/lgbm/6001/metrics.json
+
+#  train_model_lgbm_pm_25:
+#    cmd: python airpollpredictor/dvc_steps/train_lgbm_model.py --input_train_file airpollpredictor/experiments_results/lgbm/6001/train.csv --input_val_file airpollpredictor/experiments_results/lgbm/6001/val.csv --input_model_params_file airpollpredictor/experiments_results/lgbm/6001/model_params.json --output_metrics_file airpollpredictor/experiments_results/lgbm/6001/metrics.json --output_onnx_file airpollpredictor/experiments_results/lgbm/6001/model.onnx --params params.yaml --params_section lgbm_pm25 #--mlflow_artifact lgbm_pm25_info
+#    deps:
+#      - airpollpredictor/experiments_results/lgbm/6001/model_params.json
+#      - airpollpredictor/dvc_steps/train_lgbm_model.py
+#    params:
+#      - lgbm_pm25
+#      - metric
+#    outs:
+#      # - lgbm_pm25_info
+#      - airpollpredictor/experiments_results/lgbm/6001/model.onnx
+#    metrics:
+#      - airpollpredictor/experiments_results/lgbm/6001/metrics.json
