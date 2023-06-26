@@ -2,13 +2,6 @@
 pollutants-codes:
 - 6001
 
-period-settings:
-  date_start_train: &date_start_train '2015-01-01'
-  date_prev_years_end: &date_prev_years_end '2022-12-31'
-  date_current_year_start: &date_current_year_start '2023-01-01'
-  current_date: &current_date '2023-06-17'
-  last_run_date: &last_run_date '2023-02-12'
-
 split_periods:
 #  train_date_to: '2023-04-30'
   #val_date_to: '2023-06-17'

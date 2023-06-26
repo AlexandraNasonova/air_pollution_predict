@@ -30,6 +30,9 @@ class TemporaryFusionTransformerAdapter:
     def get_val_dataloader(self):
         return self._val_dataloader
 
+    def get_val_trainer(self):
+        return self._trainer
+
     def get_best_model_path(self) -> str:
         return self._trainer.checkpoint_callback.best_model_path
 

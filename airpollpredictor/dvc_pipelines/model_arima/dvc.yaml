@@ -1,17 +1,29 @@
 stages:
-  tune_model_tft_pm_25:
-    cmd: python tune_tft_model.py --input_file  ../../datasets/pollutants-weather-merged-data/aqi_all.csv --output_metrics_file ../../experiments_results/tft/6001/metrics.json --output_checkpoint_file ../../experiments_results/tft/6001/model.ckpt --mlflow_env_file ../../docker_data/env_variables.env --params params.yaml --params_section tft_pm25
-    deps:
-      -  ../../datasets/pollutants-weather-merged-data/aqi_all.csv
 
-      - tune_tft_model.py
+  filter_split_train_val_lgbm_pm_25:
+    cmd: python ../dataset_prep/filter_split_train_val.py --input_file ../../datasets/pollutants-weather-merged-data/aqi_all.csv --output_train_file ../../experiments_results/arima/6001/train.csv --output_val_file ../../experiments_results/arima/6001/val.csv --params params.yaml --params_section arima_pm25
+    deps:
+      - ../../datasets/pollutants-weather-merged-data/aqi_all.csv
+      - ../dataset_prep/filter_split_train_val.py
     params:
-      - tft_pm25
+      - arima_pm25
+      - split_periods
+    outs:
+      - ../../experiments_results/arima/6001/train.csv
+      - ../../experiments_results/arima/6001/val.csv
+
+  tune_model_arima_pm_25:
+    cmd: python tune_arima_model.py --input_train_file ../../experiments_results/arima/6001/train.csv --input_val_file ../../experiments_results/arima/6001/val.csv --output_params_file ../../experiments_results/arima/6001/params.json --output_metrics_file ../../experiments_results/arima/6001/metrics.json --output_model_file ../../experiments_results/arima/6001/model.pkl --mlflow_env_file ../../docker_data/env_variables.env --params params.yaml --params_section arima_pm25
+    deps:
+      -  ../../experiments_results/arima/6001/train.csv
+      - ../../experiments_results/arima/6001/val.csv
+
+      - tune_arima_model.py
+    params:
+      - arima_pm25
       - metric
     outs:
-      # - lgbm_pm25_info
-      - ../../experiments_results/tft/6001/model.ckpt
-      # - ../../experiments_results/tft/6001/model_params.json
+      - ../../experiments_results/arima/6001/model.pkl
     metrics:
-      - ../../experiments_results/tft/6001/metrics.json
+      - ../../experiments_results/arima/6001/metrics.json
 

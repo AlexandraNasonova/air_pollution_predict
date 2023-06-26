@@ -1,0 +1,123 @@
+schema: '2.0'
+stages:
+  filter_split_train_val_lgbm_pm_25:
+    cmd: python ../dataset_prep/filter_split_train_val.py --input_file ../../datasets/pollutants-weather-merged-data/aqi_all.csv
+      --output_train_file ../../experiments_results/arima/6001/train.csv --output_val_file
+      ../../experiments_results/arima/6001/val.csv --params params.yaml --params_section
+      arima_pm25
+    deps:
+    - path: ../../datasets/pollutants-weather-merged-data/aqi_all.csv
+      md5: 3ec9461312b71a0cb3e0d4f0720090dd
+      size: 5493507
+    - path: ../dataset_prep/filter_split_train_val.py
+      md5: 8870db0552aa19ef548b3c8478d0a0ff
+      size: 3899
+    params:
+      params.yaml:
+        arima_pm25:
+          exp_name: arima_pm25
+          run_name: base
+          pol_id: 6001
+          prediction_value_type: AQI
+          columns_filters:
+          columns_selected:
+          - AQI_PM25
+          - Wx
+          - Wy
+          - tmin
+          - prcp
+          fourier_params:
+            apply: true
+            period: 365.25
+            k_sins: 2
+          exog_params:
+            apply: true
+            exog_columns:
+            - Wx
+            - Wy
+            - tmin
+            - prcp
+          auto_arima_params:
+            test: adf
+            seasonal: false
+            d: 1
+            start_p: 0
+            start_q: 0
+            max_p: 7
+            max_q: 7
+            trace: true
+            error_action: ignore
+            suppress_warnings: true
+            stepwise: true
+        split_periods:
+          val_date_to: '2023-05-07'
+          forecast_period: 7
+          remove_days_at_start: 90
+    outs:
+    - path: ../../experiments_results/arima/6001/train.csv
+      md5: eaf937410e10f17e231e12558d7f5aa6
+      size: 169985
+    - path: ../../experiments_results/arima/6001/val.csv
+      md5: 64ba62da727fee24b9207bbd84adbccb
+      size: 458
+  tune_model_arima_pm_25:
+    cmd: python tune_arima_model.py --input_train_file ../../experiments_results/arima/6001/train.csv
+      --input_val_file ../../experiments_results/arima/6001/val.csv --output_params_file
+      ../../experiments_results/arima/6001/params.json --output_metrics_file ../../experiments_results/arima/6001/metrics.json
+      --output_model_file ../../experiments_results/arima/6001/model.pkl --mlflow_env_file
+      ../../docker_data/env_variables.env --params params.yaml --params_section arima_pm25
+    deps:
+    - path: ../../experiments_results/arima/6001/train.csv
+      md5: eaf937410e10f17e231e12558d7f5aa6
+      size: 169985
+    - path: ../../experiments_results/arima/6001/val.csv
+      md5: 64ba62da727fee24b9207bbd84adbccb
+      size: 458
+    - path: tune_arima_model.py
+      md5: 77f83cfeaf022df8c448bad321535666
+      size: 6435
+    params:
+      params.yaml:
+        arima_pm25:
+          exp_name: arima_pm25
+          run_name: base
+          pol_id: 6001
+          prediction_value_type: AQI
+          columns_filters:
+          columns_selected:
+          - AQI_PM25
+          - Wx
+          - Wy
+          - tmin
+          - prcp
+          fourier_params:
+            apply: true
+            period: 365.25
+            k_sins: 2
+          exog_params:
+            apply: true
+            exog_columns:
+            - Wx
+            - Wy
+            - tmin
+            - prcp
+          auto_arima_params:
+            test: adf
+            seasonal: false
+            d: 1
+            start_p: 0
+            start_q: 0
+            max_p: 7
+            max_q: 7
+            trace: true
+            error_action: ignore
+            suppress_warnings: true
+            stepwise: true
+        metric: rmse
+    outs:
+    - path: ../../experiments_results/arima/6001/metrics.json
+      md5: 61393fb378486b28a89c9f73c3d39925
+      size: 66
+    - path: ../../experiments_results/arima/6001/model.pkl
+      md5: 4031ef21ed032344461499d4c5c0909c
+      size: 35743504

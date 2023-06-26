@@ -1,0 +1,58 @@
+schema: '2.0'
+stages:
+  tune_model_tft_pm_25:
+    cmd: python tune_tft_model.py --input_file  ../../datasets/pollutants-weather-merged-data/aqi_all.csv
+      --output_metrics_file ../../experiments_results/tft/6001/metrics.json --output_checkpoint_file
+      ../../experiments_results/tft/6001/model.ckpt --mlflow_env_file ../../docker_data/env_variables.env
+      --params params.yaml --params_section tft_pm25
+    deps:
+    - path: ../../datasets/pollutants-weather-merged-data/aqi_all.csv
+      md5: 3ec9461312b71a0cb3e0d4f0720090dd
+      size: 5493507
+    - path: tune_tft_model.py
+      md5: 48108f07a1bc360759a935537f0b7cce
+      size: 4841
+    params:
+      params.yaml:
+        metric: rmse
+        tft_pm25:
+          exp_name: tft_pm25
+          run_name: outliers_no
+          pol_id: 6001
+          prediction_value_type: AQI
+          dataset_params:
+            max_prediction_length: 7
+            max_encoder_length: 28
+            batch_size: 64
+            group_ids:
+            - Pollutant
+            static_reals:
+            - year
+            time_varying_known_categoricals:
+            - month
+            - weekday
+            time_varying_known_reals:
+            - Wx
+            - Wy
+            - tmin
+            - prcp
+          trainer_params:
+            max_epochs: 50
+            gradient_clip_val: 0.1
+            limit_train_batches: 50
+          tft_params:
+            learning_rate: 0.1
+            hidden_size: 16
+            attention_head_size: 2
+            dropout: 0.1
+            hidden_continuous_size: 8
+            log_interval: 10
+            optimizer: Ranger
+            reduce_on_plateau_patience: 4
+    outs:
+    - path: ../../experiments_results/tft/6001/metrics.json
+      md5: c5c08c1b2ff50cd0fe66ec468cfdac75
+      size: 49
+    - path: ../../experiments_results/tft/6001/model.ckpt
+      md5: efd2efc2df84d05b73361d45d7c31aea
+      size: 822946

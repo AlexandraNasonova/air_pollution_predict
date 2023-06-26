@@ -8,7 +8,7 @@ period-settings:
 
 split_periods:
 #  train_date_to: '2023-04-30'
-  #val_date_to: '2023-06-17'
+  # val_date_to: '2023-06-17'
   val_date_to: '2023-05-17'
   forecast_period: &forecast_period 7
   remove_days_at_start: 90

@@ -305,20 +305,19 @@ stages:
   tune_model_lgbm_pm_25:
     cmd: python tune_lgbm_model.py --input_train_file ../../experiments_results/lgbm/6001/train.csv
       --input_val_file ../../experiments_results/lgbm/6001/val.csv --output_metrics_file
-      ../../experiments_results/lgbm/6001/metrics.json --output_model_params_file
-      ../../experiments_results/lgbm/6001/model_params.json --output_onnx_file ../../experiments_results/lgbm/6001/model.onnx
+      ../../experiments_results/lgbm/6001/metrics.json --output_onnx_file ../../experiments_results/lgbm/6001/model.onnx
       --mlflow_env_file ../../docker_data/env_variables.env --params params.yaml --params_section
       lgbm_pm25
     deps:
     - path: ../../experiments_results/lgbm/6001/train.csv
-      md5: 30f704641ef7432ef32151198d5d372c
-      size: 598147
+      md5: e7a37849e62062b7438013b4f4f2eced
+      size: 598894
     - path: ../../experiments_results/lgbm/6001/val.csv
-      md5: 45503e608527e4762ad33a4bbf473d27
-      size: 2116
+      md5: 9389b9976d6f6994a4b9ac9e561f22a2
+      size: 2114
     - path: tune_lgbm_model.py
-      md5: 95c6be7dfe683ee3f0bccece0b9b9c47
-      size: 8108
+      md5: 6d4f4393a452a745f57506a5d3bc5e90
+      size: 6345
     params:
       params.yaml:
         lgbm_pm25:
@@ -411,8 +410,115 @@ stages:
           optimization_direction: minimize
     outs:
     - path: ../../experiments_results/lgbm/6001/metrics.json
-      md5: 8b4e83b87843eeab5b5ac117a24e15ca
-      size: 65
+      md5: 01c9a4d1b90cf5b561cc5da076208870
+      size: 64
     - path: ../../experiments_results/lgbm/6001/model.onnx
-      md5: 6f736b4e4146ea2b9bdc6ba58c96ebce
-      size: 369833
+      md5: 93fb977419af1749d79f5700cdd1d880
+      size: 239059
+  filter_split_train_val_lgbm_pm_25:
+    cmd: python ../dataset_prep/filter_split_train_val.py --input_file ../../datasets/pollutants-weather-merged-data/aqi_all.csv
+      --output_train_file ../../experiments_results/lgbm/6001/train.csv --output_val_file
+      ../../experiments_results/lgbm/6001/val.csv --params params.yaml --params_section
+      lgbm_pm25
+    deps:
+    - path: ../../datasets/pollutants-weather-merged-data/aqi_all.csv
+      md5: 3ec9461312b71a0cb3e0d4f0720090dd
+      size: 5493507
+    - path: ../dataset_prep/filter_split_train_val.py
+      md5: 8870db0552aa19ef548b3c8478d0a0ff
+      size: 3899
+    params:
+      params.yaml:
+        columns_filters_gen: &id002
+          use_aqi_cols: true
+          use_c_mean_cols: false
+          use_c_max_cols: false
+          use_c_median_cols: false
+          use_c_min_cols: false
+          use_pol_cols: false
+          use_lag_cols: false
+          use_gen_lags_cols: true
+          use_weather_cols: true
+          pollutants_codes:
+          - 6001
+          weather_columns:
+          - tavg
+          - tmin
+          - tmax
+          - prcp
+          - wdir
+          - wspd
+          - wpgt
+          - pres
+          date_columns:
+          - weekday
+          - day
+          - month
+          - year
+          - season
+          - is_weekend
+          - is_new_year
+        lgbm_pm25:
+          exp_name: lgbm_pm25
+          run_name: outliers_no_0507
+          pol_id: 6001
+          categories:
+          - month
+          - weekday
+          default_category:
+          - month
+          - weekday
+          search_category: false
+          default_top_features_count: 30
+          default_params:
+            n_jobs: -1
+            verbosity: -1
+            objective: regression
+            metric: rmse
+            boosting_type: gbdt
+            extra_trees: true
+            n_estimators: 2100
+            num_leaves: 100
+            learning_rate: 0.01
+            subsample: 0.7
+            subsample_freq: 5
+            subsample_for_bin: 100000
+            min_child_samples: 30
+            reg_alpha: 0.1
+            reg_lambda: 0.3
+            max_depth: 10
+            max_bin: 200
+          prediction_value_type: AQI
+          columns_filters: *id002
+          columns_selected:
+          - AQI_PM25
+          - month
+          - weekday
+          - Wx
+          - Wy
+          - tmin
+          - prcp
+          - AQI_PM25_lag21d_win7D_agmean_filtNoFilter
+          - AQI_PM25_lag7d_win7D_agpercentile(10)_filtNoFilter
+          - AQI_PM25_lag7d_win3D_agpercentile(90)_filtNoFilter
+          - AQI_PM25_lag10d_win3D_agmedian_filtNoFilter
+          - AQI_PM25_lag10d_ewm7_filtNoFilter
+          - AQI_PM25_lag28d_win28D_agmean_filtNoFilter
+          - AQI_PM25_lag7d_ewm21_filtNoFilter
+          - AQI_PM25_lag7d_win14D_agpercentile(90)_filtNoFilter
+          - AQI_PM25_lag21d_win14D_agmedian_filtNoFilter
+          - AQI_PM25_lag10d_win14D_agpercentile(90)_filtNoFilter
+          - AQI_PM25_lag7d_win5D_agmean_filtNoFilter
+          - AQI_PM25_lag21d_win28D_agpercentile(10)_filtNoFilter
+          - AQI_PM25_lag21d_ewm56_filtweekday
+        split_periods:
+          val_date_to: '2023-05-07'
+          forecast_period: 7
+          remove_days_at_start: 90
+    outs:
+    - path: ../../experiments_results/lgbm/6001/train.csv
+      md5: e7a37849e62062b7438013b4f4f2eced
+      size: 598894
+    - path: ../../experiments_results/lgbm/6001/val.csv
+      md5: 9389b9976d6f6994a4b9ac9e561f22a2
+      size: 2114

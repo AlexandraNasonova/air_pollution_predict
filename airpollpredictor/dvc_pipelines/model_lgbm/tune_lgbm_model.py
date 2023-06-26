@@ -5,7 +5,6 @@ DVC Stage tune_lgbm_model - find best LGBM model params using optuna
 
 
 from argparse import ArgumentParser
-import datetime
 # import json
 import warnings
 from sklearn.model_selection import TimeSeriesSplit
@@ -15,9 +14,8 @@ from settings import settings
 import data_preprocessing.columns_filter as col_filter
 from model_tune_helpers import ts_splitter
 from model_tune_helpers.lgbm_optuna.optuna_lgb_search import OptunaLgbSearch
-from model_tune_helpers import onnx_adapter
-from model_tune_helpers import metrics_adapter
-from model_tune_helpers.mlflow_adapter import MlFlowAdapter
+from model_tune_helpers.models_saving import onnx_adapter, json_adapter
+from model_tune_helpers.models_saving.mlflow_adapter import MlFlowAdapter
 
 warnings.filterwarnings('ignore')
 
@@ -30,7 +28,6 @@ def __parse_args():
     parser.add_argument('--input_train_file', required=True, help='Path to input train data')
     parser.add_argument('--input_val_file', required=True, help='Path to input validation data')
     parser.add_argument('--output_metrics_file', required=True, help='Path to metrics file')
-    parser.add_argument('--output_model_params_file', required=True, help='Path to metrics file')
     parser.add_argument('--output_onnx_file', required=True, help='Path to onnx file')
     parser.add_argument('--params', required=True, help='Path to params')
     parser.add_argument('--params_section', required=True, help='Section with filter params')
@@ -83,28 +80,6 @@ def _get_best_categories(model_params, optuna_tuner):
     return cat_features
 
 
-# def __mlflow_init_autolog(experiment_name):
-#     env_values = env_reader.get_params(stage_args.mlflow_env_file)
-#     mlflow.set_tracking_uri(f'{env_values.get("MLFLOW_URI")}:{env_values.get("MLFLOW_PORT")}')
-#     timestamp = datetime.datetime.now().strftime("%d_%m_%Y_T_%H_%M_%S")
-#     # experiment_name = f'{experiment_name_pref}_{timestamp}'
-#     print(f'experiment_name: {experiment_name}')
-#     mlflow.set_experiment(experiment_name)
-#     # with mlflow.start_run(run_name="timestamp") as run:
-#     mlflow.lightgbm.autolog()
-#     # return run.info.experiment_id, run.info.run_id
-#
-#
-# def __mlflow_save_metrics(metric, train_score_all, val_score_all, run_name):
-#     autolog_run = mlflow.last_active_run()
-#     with mlflow.start_run(run_id=autolog_run.info.run_id):
-#         mlflow.log_metric(f'train_{metric}_all', train_score_all)
-#         mlflow.log_metric(f'val_{metric}_all', val_score_all)
-#
-#     mlflow.tracking.MlflowClient().set_tag(autolog_run.info.run_id,
-#                                            "mlflow.runName", run_name)
-
-
 if __name__ == '__main__':
     print(f'Stage {STAGE} started')
     stage_args = __parse_args()
@@ -112,6 +87,7 @@ if __name__ == '__main__':
     with open(stage_args.params, 'r', encoding='UTF-8') as file_stream:
         yaml_params = yaml.safe_load(file_stream)
     model_params = yaml_params[stage_args.params_section]
+    optuna_params = yaml_params["optuna"]
     metric = yaml_params["metric"]
 
     target_column_name = col_filter.get_target_column(
@@ -126,7 +102,7 @@ if __name__ == '__main__':
 
     print('----Optuna started---')
     optuna_tuner = __run_optuna(metric=metric,
-                                optuna_params=yaml_params["optuna"],
+                                optuna_params=optuna_params,
                                 model_params=model_params,
                                 x_train=x_train, y_train=y_train,
                                 x_val=x_val, y_val=y_val,
@@ -135,7 +111,6 @@ if __name__ == '__main__':
     print('----Optuna finished params tuning---')
     cat_features = _get_best_categories(model_params, optuna_tuner)
 
-    # __mlflow_init_autolog(model_params["exp_name"])
     # init MlFlow experiment and autolog
     mlflow_adapter = MlFlowAdapter(
         model_tp=MlFlowAdapter.ModelType.LGBM)
@@ -149,44 +124,30 @@ if __name__ == '__main__':
         best_features_only=True,
         set_as_best_model=False)
 
+    onnx_adapter.save_lgbm_model(x_train_df=x_train, model=model_best,
+                                 onnx_file_path=stage_args.output_onnx_file)
+
+    mlflow_adapter.set_run_name_to_last_run(run_name=run_name)
+    mlflow_adapter.save_extra_params_to_last_run(model_params,
+                                                 "pipeline/pipeline_params.yaml")
+    mlflow_adapter.save_extra_params_to_last_run(optuna_params,
+                                                 "pipeline/optuna_params.yaml")
+    mlflow_adapter.save_artifact_to_last_run(stage_args.output_onnx_file,
+                                             artifact_path="pkl")
+    print(f'---Model is saved')
+
     print(f'---Model trained with best params: '
           f'best_train_score: {train_score_best}, '
           f'best_val_score: {val_score_best}')
 
-    # __mlflow_save_metrics(metric, train_score_best, val_score_best, run_name)
-    mlflow_adapter.save_metrics(metric_name=metric,
-                                train_score_all=train_score_best,
-                                val_score_all=val_score_best)
-    mlflow_adapter.set_run_name(run_name=run_name)
-
-    print(f'---Model saved to MLFlow---')
-    metrics_adapter.save_metrics_to_json(
-        metrics_file_path=stage_args.output_metrics_file,
+    mlflow_adapter.save_metrics_to_last_run(
+        metric_name=metric, train_score_all=train_score_best,
+        val_score_all=val_score_best)
+    json_adapter.save_metrics_to_json(
+        file_path=stage_args.output_metrics_file,
         train_score=train_score_best,
         val_score=val_score_best,
         metric_name=metric)
-    onnx_adapter.save_lgbm_model(x_train_df=x_train, model=model_best,
-                                 onnx_file_path=stage_args.output_onnx_file)
-    print('---Model saved to ONNX, metrics to json---')
+
+    print(f'---Metrics are saved')
     print(f'Stage {STAGE} finished')
-
-#
-# def __save_model_params(model_params_output_file_path: str, model_params_to_save: dict):
-#     with open(model_params_output_file_path, 'w') as f_stream:
-#         json.dump(model_params_to_save, f_stream)
-
-# def __save_model_locally():
-#     metrics_adapter.save_metrics_to_json(
-#         metrics_file_path=stage_args.output_metrics_file,
-#         train_score=train_score_best,
-#         val_score=val_score_best,
-#         metric_name=metric)
-#
-#     print('---Metrics saved locally---')
-#
-#     tuned_model_params = optuna_tuner.study_best_params
-#     tuned_model_params['top_features_count'] = optuna_tuner.best_features_count
-#     __save_model_params(model_params_output_file_path=stage_args.output_model_params_file,
-#                         model_params_to_save=tuned_model_params)
-#
-#     print('---Model params saved locally---')

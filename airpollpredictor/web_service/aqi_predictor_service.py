@@ -8,7 +8,7 @@ pollutants for the next 3 days"""
 import json
 from fastapi import FastAPI
 import pandas as pd
-from model_tune_helpers import onnx_adapter, metrics_adapter
+from model_tune_helpers.models_saving import onnx_adapter, json_adapter
 from settings import settings
 # import model_tune_helpers.onnx_wrapper as onnx_wrapper
 # import settings.settings as settings

@@ -11,8 +11,7 @@ from settings import settings
 import data_preprocessing.columns_filter as col_filter
 from model_tune_helpers import ts_splitter
 from model_tune_helpers.lgbm_optuna.optuna_lgb_search import OptunaLgbSearch
-from model_tune_helpers import metrics_adapter
-from model_tune_helpers import onnx_adapter
+from model_tune_helpers.models_saving import onnx_adapter, json_adapter
 
 warnings.filterwarnings('ignore')
 

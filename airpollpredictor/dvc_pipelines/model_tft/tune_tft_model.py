@@ -11,13 +11,12 @@ import yaml
 from settings import settings
 import data_preprocessing.columns_filter as col_filter
 from model_tune_helpers.dl.tft_data_converter import TemporaryFusionTransformerAdapter
-from model_tune_helpers import metrics_adapter
-from model_tune_helpers.mlflow_adapter import MlFlowAdapter
-from model_tune_helpers import lightning_adapter
+from model_tune_helpers.models_saving.mlflow_adapter import MlFlowAdapter
+from model_tune_helpers.models_saving import lightning_adapter, json_adapter
 
 warnings.filterwarnings('ignore')
 
-STAGE = "tune_lgbm_model"
+STAGE = "tune_tft_model"
 
 
 # noinspection DuplicatedCode
@@ -57,37 +56,53 @@ if __name__ == '__main__':
                      index_col=settings.DATE_COLUMN_NAME)
     tft_adapter.prepare_dataset(df=df)
 
+    run_name = f'{model_params["exp_name"]}_{model_params["run_name"]}'
     # init MlFlow experiment and autolog
     mlflow_adapter = MlFlowAdapter(
-        model_tp=MlFlowAdapter.ModelType.TEMPORARY_FUSION_TRANSFORMER)
+        model_tp=MlFlowAdapter.ModelType.PD_ARIMA)
     mlflow_adapter.set_experiment(experiment_name=model_params["exp_name"],
                                   mlflow_env_file=stage_args.mlflow_env_file)
-    mlflow_adapter.init_autolog()
+    mlflow_adapter.start_run(run_name=run_name)
 
-    tft_adapter.train(trainer_params=model_params["trainer_params"],
-                      tft_params=model_params["tft_params"])
+    try:
+        mlflow_adapter.save_extra_params(model_params, "pipeline/pipeline_params.yaml")
+        print('----TFT train started---')
+        tft_adapter.train(trainer_params=model_params["trainer_params"],
+                          tft_params=model_params["tft_params"])
+        print('----TFT train finished---')
 
-    val_score_best = tft_adapter.get_val_metric()
+        # mlflow_adapter.save_model(model=tft_adapter,
+        #                           x_train_df=tft_adapter.get_train_dataloader(),
+        #                           y_train_df=tft_adapter.get_val_dataloader(),
+        #                           artifact_path=stage_args.params_section,
+        #                           best_model_params={
+        #                               "trainer_params": model_params["trainer_params"],
+        #                               "tft_params": model_params["tft_params"]
+        #                           }
+        #                           )
+        mlflow_adapter.save_params({
+              "trainer_params": model_params["trainer_params"],
+              "tft_params": model_params["tft_params"]
+          })
+        lightning_adapter.copy_best_checkpoint(
+            tft_adapter.get_best_model_path(), stage_args.output_checkpoint_file)
+        mlflow_adapter.save_artifact(tft_adapter.get_best_model_path(),
+                                     artifact_path="pkl")
+        print(f'---Model is saved')
 
-    print(f'---Model trained with best params: '
-          # f'best_train_score: {train_score_best}, '
-          f'best_val_score: {val_score_best}')
+        val_score_best = tft_adapter.get_val_metric()
+        print(f'---Model trained with best params: '
+              f'best_val_score: {val_score_best}')
 
-    mlflow_adapter.save_metrics(metric_name=metric,
-                                train_score_all=0,
-                                val_score_all=val_score_best)
-    mlflow_adapter.set_run_name(run_name=run_name)
+        mlflow_adapter.save_metrics(train_score=0,
+                                    val_score=val_score_best,
+                                    metric_name=metric)
+        json_adapter.save_metrics_to_json(
+            file_path=stage_args.output_metrics_file,
+            train_score=0, val_score=val_score_best, metric_name=metric)
+        print(f'---Metrics are saved')
 
-    print(f'---Model saved to MLFlow---')
-
-    metrics_adapter.save_metrics_to_json(
-        metrics_file_path=stage_args.output_metrics_file,
-        train_score=0,
-        val_score=val_score_best,
-        metric_name=metric)
-
-    best_model_path = tft_adapter.get_best_model_path()
-    lightning_adapter.copy_best_checkpoint(best_model_path,
-                                           stage_args.output_checkpoint_file)
-    print('---Lightning checkpoint copied, metrics saved to json---')
-    print(f'Stage {STAGE} finished')
+        print(f'Stage {STAGE} finished')
+    finally:
+        pass
+        mlflow_adapter.end_run()
