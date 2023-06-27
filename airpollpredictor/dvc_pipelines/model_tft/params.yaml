@@ -9,22 +9,22 @@ period-settings:
 split_periods:
 #  train_date_to: '2023-04-30'
   # val_date_to: '2023-06-17'
-  val_date_to: '2023-05-17'
+  val_date_to: '2023-03-13'
   forecast_period: &forecast_period 7
   remove_days_at_start: 90
 
 metric: &metric rmse
 
 tft_pm25:
-  exp_name: tft_pm25
-  run_name: outliers_no
+  exp_name: tft_pm25_0313
+  run_name: year_weather_batch_128_lr_01_grad_clip_03
   pol_id: 6001
   prediction_value_type: AQI
 
   dataset_params:
     max_prediction_length: *forecast_period
     max_encoder_length: 28
-    batch_size: 64
+    batch_size: 128
     group_ids:
       - Pollutant
     static_reals:
@@ -39,8 +39,8 @@ tft_pm25:
       - prcp
 
   trainer_params:
-      max_epochs: 50
-      gradient_clip_val: 0.1
+      max_epochs: 100
+      gradient_clip_val: 0.3
       limit_train_batches: 50
 
   tft_params:

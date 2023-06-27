@@ -306,30 +306,26 @@ stages:
     cmd: python tune_lgbm_model.py --input_train_file ../../experiments_results/lgbm/6001/train.csv
       --input_val_file ../../experiments_results/lgbm/6001/val.csv --output_metrics_file
       ../../experiments_results/lgbm/6001/metrics.json --output_onnx_file ../../experiments_results/lgbm/6001/model.onnx
-      --mlflow_env_file ../../docker_data/env_variables.env --params params.yaml --params_section
-      lgbm_pm25
+      --output_pred_file ../../experiments_results/lgbm/6001/predictions.csv --mlflow_env_file
+      ../../docker_data/env_variables.env --params params.yaml --params_section lgbm_pm25
     deps:
     - path: ../../experiments_results/lgbm/6001/train.csv
-      md5: e7a37849e62062b7438013b4f4f2eced
-      size: 598894
+      md5: f9f156be934dec5a1b4b681422b9883b
+      size: 172427
     - path: ../../experiments_results/lgbm/6001/val.csv
-      md5: 9389b9976d6f6994a4b9ac9e561f22a2
-      size: 2114
+      md5: 88fc7262ae15520c6be0cb1c08eb34f4
+      size: 454
     - path: tune_lgbm_model.py
-      md5: 6d4f4393a452a745f57506a5d3bc5e90
-      size: 6345
+      md5: b7d8a2dd9f2c44796945fb06b34cf8dc
+      size: 6753
     params:
       params.yaml:
         lgbm_pm25:
-          exp_name: lgbm_pm25
-          run_name: outliers_no_0507
+          exp_name: lgbm_pm25_0617
+          run_name: weather_cat_no
           pol_id: 6001
           categories:
-          - month
-          - weekday
           default_category:
-          - month
-          - weekday
           search_category: false
           default_top_features_count: 30
           default_params:
@@ -382,39 +378,24 @@ stages:
             - is_new_year
           columns_selected:
           - AQI_PM25
-          - month
-          - weekday
           - Wx
           - Wy
           - tmin
           - prcp
-          - AQI_PM25_lag21d_win7D_agmean_filtNoFilter
-          - AQI_PM25_lag7d_win7D_agpercentile(10)_filtNoFilter
-          - AQI_PM25_lag7d_win3D_agpercentile(90)_filtNoFilter
-          - AQI_PM25_lag10d_win3D_agmedian_filtNoFilter
-          - AQI_PM25_lag10d_ewm7_filtNoFilter
-          - AQI_PM25_lag28d_win28D_agmean_filtNoFilter
-          - AQI_PM25_lag7d_ewm21_filtNoFilter
-          - AQI_PM25_lag7d_win14D_agpercentile(90)_filtNoFilter
-          - AQI_PM25_lag21d_win14D_agmedian_filtNoFilter
-          - AQI_PM25_lag10d_win14D_agpercentile(90)_filtNoFilter
-          - AQI_PM25_lag7d_win5D_agmean_filtNoFilter
-          - AQI_PM25_lag21d_win28D_agpercentile(10)_filtNoFilter
-          - AQI_PM25_lag21d_ewm56_filtweekday
         metric: rmse
         optuna:
           objective: regression
-          n_trials: 50
+          n_trials: 200
           n_jobs: 8
           cv_folders: 16
           optimization_direction: minimize
     outs:
     - path: ../../experiments_results/lgbm/6001/metrics.json
-      md5: 01c9a4d1b90cf5b561cc5da076208870
-      size: 64
+      md5: b8ec01dbc27171d1fefaf34acfadda2c
+      size: 65
     - path: ../../experiments_results/lgbm/6001/model.onnx
-      md5: 93fb977419af1749d79f5700cdd1d880
-      size: 239059
+      md5: c6d28dd8ea09480d91d534b3d96c4ccf
+      size: 31012
   filter_split_train_val_lgbm_pm_25:
     cmd: python ../dataset_prep/filter_split_train_val.py --input_file ../../datasets/pollutants-weather-merged-data/aqi_all.csv
       --output_train_file ../../experiments_results/lgbm/6001/train.csv --output_val_file
@@ -459,15 +440,11 @@ stages:
           - is_weekend
           - is_new_year
         lgbm_pm25:
-          exp_name: lgbm_pm25
-          run_name: outliers_no_0507
+          exp_name: lgbm_pm25_0617
+          run_name: weather_cat_no
           pol_id: 6001
           categories:
-          - month
-          - weekday
           default_category:
-          - month
-          - weekday
           search_category: false
           default_top_features_count: 30
           default_params:
@@ -492,33 +469,18 @@ stages:
           columns_filters: *id002
           columns_selected:
           - AQI_PM25
-          - month
-          - weekday
           - Wx
           - Wy
           - tmin
           - prcp
-          - AQI_PM25_lag21d_win7D_agmean_filtNoFilter
-          - AQI_PM25_lag7d_win7D_agpercentile(10)_filtNoFilter
-          - AQI_PM25_lag7d_win3D_agpercentile(90)_filtNoFilter
-          - AQI_PM25_lag10d_win3D_agmedian_filtNoFilter
-          - AQI_PM25_lag10d_ewm7_filtNoFilter
-          - AQI_PM25_lag28d_win28D_agmean_filtNoFilter
-          - AQI_PM25_lag7d_ewm21_filtNoFilter
-          - AQI_PM25_lag7d_win14D_agpercentile(90)_filtNoFilter
-          - AQI_PM25_lag21d_win14D_agmedian_filtNoFilter
-          - AQI_PM25_lag10d_win14D_agpercentile(90)_filtNoFilter
-          - AQI_PM25_lag7d_win5D_agmean_filtNoFilter
-          - AQI_PM25_lag21d_win28D_agpercentile(10)_filtNoFilter
-          - AQI_PM25_lag21d_ewm56_filtweekday
         split_periods:
-          val_date_to: '2023-05-07'
+          val_date_to: '2023-06-17'
           forecast_period: 7
           remove_days_at_start: 90
     outs:
     - path: ../../experiments_results/lgbm/6001/train.csv
-      md5: e7a37849e62062b7438013b4f4f2eced
-      size: 598894
+      md5: f9f156be934dec5a1b4b681422b9883b
+      size: 172427
     - path: ../../experiments_results/lgbm/6001/val.csv
-      md5: 9389b9976d6f6994a4b9ac9e561f22a2
-      size: 2114
+      md5: 88fc7262ae15520c6be0cb1c08eb34f4
+      size: 454

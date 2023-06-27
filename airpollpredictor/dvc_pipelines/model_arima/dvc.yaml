@@ -13,7 +13,7 @@ stages:
       - ../../experiments_results/arima/6001/val.csv
 
   tune_model_arima_pm_25:
-    cmd: python tune_arima_model.py --input_train_file ../../experiments_results/arima/6001/train.csv --input_val_file ../../experiments_results/arima/6001/val.csv --output_params_file ../../experiments_results/arima/6001/params.json --output_metrics_file ../../experiments_results/arima/6001/metrics.json --output_model_file ../../experiments_results/arima/6001/model.pkl --mlflow_env_file ../../docker_data/env_variables.env --params params.yaml --params_section arima_pm25
+    cmd: python tune_arima_model.py --input_train_file ../../experiments_results/arima/6001/train.csv --input_val_file ../../experiments_results/arima/6001/val.csv --output_params_file ../../experiments_results/arima/6001/params.json --output_metrics_file ../../experiments_results/arima/6001/metrics.json --output_model_file ../../experiments_results/arima/6001/model.pkl --output_pred_file ../../experiments_results/arima/6001/predictions.csv --mlflow_env_file ../../docker_data/env_variables.env --params params.yaml --params_section arima_pm25
     deps:
       -  ../../experiments_results/arima/6001/train.csv
       - ../../experiments_results/arima/6001/val.csv

@@ -66,6 +66,10 @@ class TemporaryFusionTransformerAdapter:
         max_encoder_length = self._dataset_params["max_encoder_length"]
         training_cutoff = df[settings.DATE_COLUMN_NUM_IND_NAME].max() - max_prediction_length
 
+        time_varying_known_reals = [settings.DATE_COLUMN_NUM_IND_NAME]
+        if self._dataset_params["time_varying_known_reals"]:
+            time_varying_known_reals += self._dataset_params["time_varying_known_reals"]
+
         self._training = TimeSeriesDataSet(
             df[lambda x: x[settings.DATE_COLUMN_NUM_IND_NAME] <= training_cutoff],
             time_idx=settings.DATE_COLUMN_NUM_IND_NAME,
@@ -77,10 +81,9 @@ class TemporaryFusionTransformerAdapter:
             min_prediction_length=1,
             max_prediction_length=max_prediction_length,
             # static_categoricals=params["group_ids"],
-            static_reals=self._dataset_params["static_reals"],
+            static_reals=[] ,#self._dataset_params["static_reals"],
             time_varying_known_categoricals=self._dataset_params["time_varying_known_categoricals"],
-            time_varying_known_reals=[settings.DATE_COLUMN_NUM_IND_NAME]
-            + self._dataset_params["time_varying_known_reals"],
+            time_varying_known_reals=time_varying_known_reals,
             time_varying_unknown_categoricals=[],
             time_varying_unknown_reals=[],
             target_normalizer=GroupNormalizer(
@@ -117,6 +120,8 @@ class TemporaryFusionTransformerAdapter:
         self.__set_timeseries_dataset(df_c)
 
     def train(self, trainer_params, tft_params):
+        pl.seed_everything(42)
+
         self._trainer = pl.Trainer(
             accelerator="cpu",
             enable_model_summary=False,
@@ -146,4 +151,5 @@ class TemporaryFusionTransformerAdapter:
 
     def get_val_metric(self):
         predictions = self.get_predictions()
-        return RMSE()(predictions.output, predictions.y).item()
+        rmse = RMSE()(predictions.output, predictions.y).item()
+        return rmse, predictions

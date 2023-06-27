@@ -5,7 +5,7 @@ pollutants-codes:
 split_periods:
 #  train_date_to: '2023-04-30'
   #val_date_to: '2023-06-17'
-  val_date_to: '2023-05-07'
+  val_date_to: '2023-06-17'
   forecast_period: &forecast_period 7
   remove_days_at_start: 90
 
@@ -13,7 +13,7 @@ metric: &metric rmse
 
 optuna:
   objective: &objective regression
-  n_trials: 50
+  n_trials: 200
   n_jobs: 8
   cv_folders: 16
   optimization_direction: minimize
@@ -49,15 +49,11 @@ columns_filters_gen: &columns_filters_gen
   - is_new_year
 
 lgbm_pm25:
-  exp_name: lgbm_pm25
-  run_name: outliers_no_0507
+  exp_name: lgbm_pm25_0617
+  run_name: weather_cat_no
   pol_id: 6001
   categories:
-  - month
-  - weekday
   default_category:
-  - month
-  - weekday
   search_category: false
   default_top_features_count: 30
   default_params:
@@ -82,22 +78,7 @@ lgbm_pm25:
   columns_filters: *columns_filters_gen
   columns_selected:
   - AQI_PM25
-  - month
-  - weekday
   - Wx
   - Wy
   - tmin
   - prcp
-  - AQI_PM25_lag21d_win7D_agmean_filtNoFilter
-  - AQI_PM25_lag7d_win7D_agpercentile(10)_filtNoFilter
-  - AQI_PM25_lag7d_win3D_agpercentile(90)_filtNoFilter
-  - AQI_PM25_lag10d_win3D_agmedian_filtNoFilter
-  - AQI_PM25_lag10d_ewm7_filtNoFilter
-  - AQI_PM25_lag28d_win28D_agmean_filtNoFilter
-  - AQI_PM25_lag7d_ewm21_filtNoFilter
-  - AQI_PM25_lag7d_win14D_agpercentile(90)_filtNoFilter
-  - AQI_PM25_lag21d_win14D_agmedian_filtNoFilter
-  - AQI_PM25_lag10d_win14D_agpercentile(90)_filtNoFilter
-  - AQI_PM25_lag7d_win5D_agmean_filtNoFilter
-  - AQI_PM25_lag21d_win28D_agpercentile(10)_filtNoFilter
-  - AQI_PM25_lag21d_ewm56_filtweekday

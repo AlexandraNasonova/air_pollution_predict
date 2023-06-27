@@ -29,6 +29,7 @@ def __parse_args():
     parser.add_argument('--input_val_file', required=True, help='Path to input validation data')
     parser.add_argument('--output_metrics_file', required=True, help='Path to metrics file')
     parser.add_argument('--output_onnx_file', required=True, help='Path to onnx file')
+    parser.add_argument('--output_pred_file', required=False, help='Path to predicts file')
     parser.add_argument('--params', required=True, help='Path to params')
     parser.add_argument('--params_section', required=True, help='Section with filter params')
     parser.add_argument('--mlflow_env_file', required=True, help='Path to env file MlFlow')
@@ -122,7 +123,7 @@ if __name__ == '__main__':
         params=optuna_tuner.study_best_params,
         categorical_features=cat_features,
         best_features_only=True,
-        set_as_best_model=False)
+        set_as_best_model=True)
 
     onnx_adapter.save_lgbm_model(x_train_df=x_train, model=model_best,
                                  onnx_file_path=stage_args.output_onnx_file)
@@ -134,6 +135,13 @@ if __name__ == '__main__':
                                                  "pipeline/optuna_params.yaml")
     mlflow_adapter.save_artifact_to_last_run(stage_args.output_onnx_file,
                                              artifact_path="pkl")
+
+    predictions = optuna_tuner.predict_by_best_model(x_val)
+    if stage_args.output_pred_file:
+        pd.DataFrame(predictions, columns=['C1'])\
+            .to_csv(stage_args.output_pred_file)
+        mlflow_adapter.save_artifact_to_last_run(
+            stage_args.output_pred_file, artifact_path="predictions")
     print(f'---Model is saved')
 
     print(f'---Model trained with best params: '

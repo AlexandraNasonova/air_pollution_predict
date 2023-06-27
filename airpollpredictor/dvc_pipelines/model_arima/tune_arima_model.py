@@ -29,10 +29,10 @@ def __parse_args():
     parser.add_argument('--output_params_file', required=True, help='Path to params file')
     parser.add_argument('--output_metrics_file', required=True, help='Path to metrics file')
     parser.add_argument('--output_model_file', required=True, help='Path to model file')
+    parser.add_argument('--output_pred_file', required=False, help='Path to predicts file')
     parser.add_argument('--params', required=True, help='Path to params')
     parser.add_argument('--params_section', required=True, help='Section with filter params')
     parser.add_argument('--mlflow_env_file', required=True, help='Path to env file MlFlow')
-    # parser.add_argument('--mlflow_artifact', required=True, help='MLFlow model artifacts path')
     return parser.parse_args()
 
 
@@ -77,9 +77,10 @@ def __get_train_val_fourier_exog(input_train_file: str, input_val_file: str,
     return y_train, y_val, None, None
 
 
-def __predict_rmse(model, y_val, exog) -> float:
+def __predict_rmse(model, y_val, exog):
     predictions = model.predict(n_periods=len(y_val), X=exog)
-    return mean_squared_error(y_true=y_val, y_pred=predictions, squared=False)
+    rmse = mean_squared_error(y_true=y_val, y_pred=predictions, squared=False)
+    return rmse, predictions
 
 
 if __name__ == '__main__':
@@ -116,7 +117,8 @@ if __name__ == '__main__':
         print('----PMARIMA started---')
         model = pm.auto_arima(y=y_train, X=exog_train, **model_params["auto_arima_params"])
         print('----PMARIMA finished params tuning---')
-        mlflow_adapter.save_model(model=model, x_train_df=exog_train,
+        mlflow_adapter.save_model(model=model,
+                                  x_train_df=None, #exog_train,
                                   y_train_df=y_train,
                                   artifact_path="model",
                                   best_model_params=model.get_params())
@@ -128,14 +130,21 @@ if __name__ == '__main__':
                                      artifact_path="pkl")
         print(f'---Model is saved')
 
-        train_score_best = __predict_rmse(model, y_train, exog_train)
-        val_score_best = __predict_rmse(model, y_val, exog_val)
+        train_score_best, _ = __predict_rmse(model, y_train, exog_train)
+        val_score_best, predictions = __predict_rmse(model, y_val, exog_val)
         print(f'---Model trained with best params: '
               f'best_train_score: {train_score_best}, '
               f'best_val_score: {val_score_best}')
         mlflow_adapter.save_metrics(train_score=train_score_best,
                                     val_score=val_score_best,
                                     metric_name=metric)
+        if stage_args.output_pred_file:
+            predictions.to_frame().to_csv(stage_args.output_pred_file)
+            mlflow_adapter.save_artifact(stage_args.output_pred_file,
+                                         artifact_path="predictions")
+
+        # mlflow_adapter.save_dataframe(df=predictions.to_frame(),
+        #                               artifact_path="predictions")
         json_adapter.save_metrics_to_json(file_path=stage_args.output_metrics_file,
                                           train_score=train_score_best,
                                           val_score=val_score_best,

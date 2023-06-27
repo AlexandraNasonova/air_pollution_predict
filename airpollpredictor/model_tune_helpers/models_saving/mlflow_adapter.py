@@ -106,13 +106,20 @@ class MlFlowAdapter:
         @param artifact_path: The path to artifact
         @param best_model_params: Parameters of the best model
         """
-        signature = infer_signature(x_train_df, y_train_df)
+        if x_train_df:
+            signature = infer_signature(x_train_df, y_train_df)
+        else:
+            signature = infer_signature(y_train_df, y_train_df)
         self.__log_model(model=model, signature=signature, artifact_path=artifact_path)
         self.save_params(best_model_params)
 
     @staticmethod
     def save_params(params: dict):
         mlflow.log_params(params)
+
+    @staticmethod
+    def save_tag(key: str, value):
+        mlflow.set_tag(key, value)
 
     def save_extra_params_to_last_run(self, params: dict, artifact_file: str,
                                       run_id=0):
@@ -144,3 +151,13 @@ class MlFlowAdapter:
     @staticmethod
     def save_artifact_folder(source_folder: str, artifact_path: str):
         mlflow.log_artifacts(source_folder, artifact_path)
+
+    def save_dataframe_to_last_run(self, df: pd.DataFrame, artifact_path: str,
+                                   run_id=0):
+        run_id = mlflow.last_active_run().info.run_id if run_id == 0 else run_id
+        with mlflow.start_run(run_id=run_id):
+            self.save_dataframe(df, artifact_path)
+
+    @staticmethod
+    def save_dataframe(df: pd.DataFrame, artifact_path: str):
+        mlflow.log_table(df, artifact_path)

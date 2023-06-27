@@ -10,8 +10,6 @@ from fastapi import FastAPI
 import pandas as pd
 from model_tune_helpers.models_saving import onnx_adapter, json_adapter
 from settings import settings
-# import model_tune_helpers.onnx_wrapper as onnx_wrapper
-# import settings.settings as settings
 
 app = FastAPI()
 
@@ -53,4 +51,4 @@ def evaluate():
     The model is automatically retrained afterward.
     @return: Dictionary with keys train_[metric_name] and val__[metric_name]
     """
-    return metrics_adapter.read_metrics_from_json(METRICS_PATH)
+    return json_adapter.read_from_json(METRICS_PATH)
