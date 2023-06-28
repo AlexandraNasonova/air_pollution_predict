@@ -4,11 +4,12 @@
 Timeseries transformations helper: Lag-differentiation, Fourier and Box-Cox transformations
 """
 from copy import deepcopy
+import numpy as np
 import pandas as pd
 from pmdarima.preprocessing import FourierFeaturizer
 from sklearn.preprocessing import PowerTransformer
 from scipy.special import boxcox1p
-import ml_models_search.ts_plotter as ts_plt
+import model_tune_helpers.ts_plotter as ts_plt
 
 pt = PowerTransformer(method='yeo-johnson')
 
@@ -19,21 +20,44 @@ class TransformHelper:
     """
 
     @staticmethod
-    def apply_fourier(df_timeseries: pd.DataFrame, m_season_period=365, k_sins=1) -> pd.DataFrame:
-        """
-        Applies Fourier transformation to the time series
-        @param df_timeseries: The timeseries
-        @param m_season_period: The seasonal periodicity of the endogenous vector, y.
-        @param k_sins: The number of sine and cosine terms (each) to include
-        @return: Dataframe after Fourier-transformation without date column
-        """
-        four_terms = FourierFeaturizer(m=m_season_period, k=k_sins)
-        y_prime, exog = four_terms.fit_transform(df_timeseries)
-        exog['date'] = y_prime.index
-        exog = exog.set_index(exog['date'])
-        exog.index.freq = 'D'
-        exog = exog.drop(columns=['date'])
-        return exog
+    def apply_fourier(y_train: pd.DataFrame, y_val: pd.DataFrame,
+                      date_column: str,
+                      m_season_period=365.25, k_sins=1):
+        y = pd.concat([y_train, y_val])
+        fourier = pd.DataFrame({date_column: y.index})
+        fourier[date_column] = y.index
+        fourier = fourier.set_index(fourier[date_column])
+        fourier.index.freq = 'D'
+
+        for k in range(1, k_sins+1):
+            fourier['sin365_'+str(k)] = \
+                np.sin(k * 2 * np.pi * fourier.index.dayofyear / m_season_period)
+            fourier['cos365_'+str(k)] = \
+                np.cos(k * 2 * np.pi * fourier.index.dayofyear / m_season_period)
+
+        fourier = fourier.drop(columns=[date_column])
+        fourier_train = fourier.iloc[:(len(y) - len(y_val))]
+        fourier_test = fourier.iloc[(len(y) - len(y_val)):]
+
+        return fourier_train, fourier_test
+
+
+    # @staticmethod
+    # def apply_fourier(df_timeseries: pd.DataFrame, m_season_period=365, k_sins=1) -> pd.DataFrame:
+    #     """
+    #     Applies Fourier transformation to the time series
+    #     @param df_timeseries: The timeseries
+    #     @param m_season_period: The seasonal periodicity of the endogenous vector, y.
+    #     @param k_sins: The number of sine and cosine terms (each) to include
+    #     @return: Dataframe after Fourier-transformation without date column
+    #     """
+    #     four_terms = FourierFeaturizer(m=m_season_period, k=k_sins)
+    #     y_prime, exog = four_terms.fit_transform(df_timeseries)
+    #     exog['date'] = y_prime.index
+    #     exog = exog.set_index(exog['date'])
+    #     exog.index.freq = 'D'
+    #     exog = exog.drop(columns=['date'])
+    #     return exog
 
     @staticmethod
     def apply_best_box_cox(df_timeseries: pd.DataFrame,

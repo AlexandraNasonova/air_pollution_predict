@@ -7,6 +7,9 @@ jupiter_experiments/datasources/weather/*
 jupiter_experiments/datasources/ds_joint/*
 jupiter_experiments/lgbm/score.csv
 jupiter_experiments/lgbm/score_1.csv
+jupiter_experiments/pytorch_forecasting/lightning_logs/*
+dvc_pipelines/model_tft/lightning_logs/*
+docker
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

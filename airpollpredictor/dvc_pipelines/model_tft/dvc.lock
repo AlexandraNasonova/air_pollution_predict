@@ -1,0 +1,61 @@
+schema: '2.0'
+stages:
+  tune_model_tft_pm_25:
+    cmd: python tune_tft_model.py --input_file  ../../datasets/pollutants-weather-merged-data/aqi_all.csv
+      --output_metrics_file ../../experiments_results/tft/6001/metrics.json --output_checkpoint_file
+      ../../experiments_results/tft/6001/model.ckpt --output_pred_file ../../experiments_results/tft/6001/predictions.csv
+      --mlflow_env_file ../../docker_data/env_variables.env --params params.yaml --params_section
+      tft_pm25
+    deps:
+    - path: ../../datasets/pollutants-weather-merged-data/aqi_all.csv
+      md5: 3ec9461312b71a0cb3e0d4f0720090dd
+      size: 5493507
+    - path: tune_tft_model.py
+      md5: 618138cc3756cdc8111b8ea404ed9d63
+      size: 5370
+    params:
+      params.yaml:
+        metric: rmse
+        split_periods:
+          val_date_to: '2023-06-17'
+          forecast_period: 7
+          remove_days_at_start: 90
+        tft_pm25:
+          exp_name: tft_pm25_0617
+          run_name: weather_year_batch_128_cat_no
+          pol_id: 6001
+          prediction_value_type: AQI
+          dataset_params:
+            max_prediction_length: 7
+            max_encoder_length: 28
+            batch_size: 128
+            group_ids:
+            - Pollutant
+            static_reals:
+            - year
+            time_varying_known_categoricals:
+            time_varying_known_reals:
+            - Wx
+            - Wy
+            - tmin
+            - prcp
+          trainer_params:
+            max_epochs: 100
+            gradient_clip_val: 0.3
+            limit_train_batches: 50
+          tft_params:
+            learning_rate: 0.1
+            hidden_size: 16
+            attention_head_size: 2
+            dropout: 0.1
+            hidden_continuous_size: 8
+            log_interval: 10
+            optimizer: Ranger
+            reduce_on_plateau_patience: 4
+    outs:
+    - path: ../../experiments_results/tft/6001/metrics.json
+      md5: fd4b8165412d2899ab5394ff9405e9c8
+      size: 47
+    - path: ../../experiments_results/tft/6001/model.ckpt
+      md5: e8e7e47761465792b4c17ef8fec44b18
+      size: 789466

@@ -1,0 +1,73 @@
+#pollutants-codes: &pol_codes [7, 6001, 5, 8]
+
+split_periods:
+#  train_date_to: '2023-04-30'
+  #val_date_to: '2023-06-17'
+  #val_date_to: &val_date_to '2023-06-17'
+  val_date_to: &val_date_to '2023-06-17'
+  forecast_period: &forecast_period 7
+  remove_days_at_start: 90
+
+metric: &metric rmse
+
+arima_pm25:
+  exp_name: arima_pm25_0617
+  run_name: weather_fourier_k1_seasonal_7
+  pol_id: 6001
+  prediction_value_type: AQI
+  columns_filters:
+  columns_selected:
+  - AQI_PM25
+  - Wx
+  - Wy
+  - tmin
+  - prcp
+
+  fourier_params:
+    apply: True
+    period: 365.25
+    k_sins: 1
+
+  exog_params:
+    apply: True
+    exog_columns:
+      - Wx
+      - Wy
+      - tmin
+      - prcp
+
+  auto_arima_params:
+    test: adf
+    seasonal: True
+    d: 1
+    start_p: 0
+    start_q: 0
+    max_p: 7
+    max_q: 7
+    m: 7
+    start_P: 0
+    start_Q: 0
+    trace: True
+    error_action: ignore
+    suppress_warnings: True
+    stepwise: True
+
+#  auto_arima_params:
+#    test: adf
+#    seasonal: False
+#    d: 1
+#    start_p: 0
+#    start_q: 0
+
+#    m: 7
+#    start_P: 0
+#    start_Q: 0
+#    max_p: 7
+#    max_q: 7
+#    maxiter: 50000
+#    with_intercept: True
+#    trend: ct
+#    trace: True
+#    error_action: ignore
+#    suppress_warnings: True
+#    stepwise: True

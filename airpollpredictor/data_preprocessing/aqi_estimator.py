@@ -9,9 +9,9 @@ from settings import settings
 from .aqi_calculations import aqi_calculator as aqc
 
 
-def calculate_aqi_indexes(source_data_path: str, pollutants_codes: [int]):
+def read_and_calculate_aqi(source_data_path: str, pollutants_codes: [int]):
     """
-    Calculate AQI indices for pollutant files with clean data
+    Reads csv files for pollutants and calculates AQI indices for pollutant files with clean data
     @param source_data_path: The path to pollutant files
     @param pollutants_codes: The list of pollutant codes
     @return: List of dataframes with calculated AQI per pollutant
@@ -25,15 +25,16 @@ def calculate_aqi_indexes(source_data_path: str, pollutants_codes: [int]):
     return df_aqi_list
 
 
-def save_aqi_data(pollutants_codes: [int], df_aqi_list: list[pd.DataFrame],
-                  output_path: str):
+def calculate_aqi(df_pol_list: list[pd.DataFrame], pollutants_codes: [int]):
     """
-    Saves calculated AQI per pollutants to .csv files
+    Calculate AQI indices for pollutant files with clean data
+    @param df_pol_list: List with concentration datasets per pollutant
     @param pollutants_codes: The list of pollutant codes
-    @param df_aqi_list: List of dataframes with calculated AQI per pollutant
-    @param output_path: The output path
+    @return: List of dataframes with calculated AQI per pollutant
     """
-    # pylint: disable=C0200
+    df_aqi_list = []
     for i in range(len(pollutants_codes)):
-        file_path = os.path.join(output_path, f'{pollutants_codes[i]}.csv')
-        df_aqi_list[i].to_csv(file_path)
+        pollutant_id = pollutants_codes[i]
+        measure = settings.POL_MEASURES[pollutant_id]
+        df_aqi_list.append(aqc.calc_aqi_for_day_pd(pollutant_id, df_pol_list[i], measure))
+    return df_aqi_list

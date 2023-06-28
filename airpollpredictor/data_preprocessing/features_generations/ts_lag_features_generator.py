@@ -124,13 +124,8 @@ def shift(lf_df_filled: pd.DataFrame, group_col: [], date_col: str, lag: int):
     @param lag: Value of the lag to shift back
     @return: Shifted by lag days dataframe
     """
-    # lf_df = lf_df_filled.groupby(
-    #     level=group_col[:-1]).apply(lambda x: x.shift(lag)).reset_index()
     lf_df = lf_df_filled.apply(lambda x: x.shift(lag)).reset_index()
-    # lf_df[date_col] = pd.to_datetime(lf_df[date_col].astype(str))
     lf_df[date_col] = pd.to_datetime(lf_df[date_col].astype(str)).map(datetime.datetime.date)
-
-    # return DataFrame with following columns: filter_col, id_cols, date_col and shifted stats
     return lf_df
 
 
@@ -199,7 +194,6 @@ def generate_lagged_features(
                     filter_col_str = f'filt{filter_col}' if filter_count > 1 else ''
 
                     data_preag_filled = calc_preag_fill(data_adj, group_col, date_col, target_cols, preagg)
-
                     # add ewm features
                     for alpha in ewm_params.get(filter_col, []):
                         ewm_filled = calc_ewm(data_preag_filled, group_col, date_col, alpha)
@@ -233,4 +227,7 @@ def generate_lagged_features(
                             bar.next()
                             # progress.value += 1
 
+    data_gen.reset_index(inplace=True, drop=True)
+    data_gen[date_col] = pd.DatetimeIndex(data_gen[date_col])
+    data_gen.set_index(date_col, inplace=True, drop=True)
     return data_gen

@@ -1,0 +1,84 @@
+#pollutants-codes: &pol_codes [7, 6001, 5, 8]
+pollutants-codes:
+- 6001
+
+split_periods:
+#  train_date_to: '2023-04-30'
+  #val_date_to: '2023-06-17'
+  val_date_to: '2023-06-17'
+  forecast_period: &forecast_period 7
+  remove_days_at_start: 90
+
+metric: &metric rmse
+
+optuna:
+  objective: &objective regression
+  n_trials: 200
+  n_jobs: 8
+  cv_folders: 16
+  optimization_direction: minimize
+
+columns_filters_gen: &columns_filters_gen
+  use_aqi_cols: true
+  use_c_mean_cols: false
+  use_c_max_cols: false
+  use_c_median_cols: false
+  use_c_min_cols: false
+  use_pol_cols: false
+  use_lag_cols: false
+  use_gen_lags_cols: true
+  use_weather_cols: true
+  pollutants_codes:
+  - 6001
+  weather_columns:
+  - tavg
+  - tmin
+  - tmax
+  - prcp
+  - wdir
+  - wspd
+  - wpgt
+  - pres
+  date_columns:
+  - weekday
+  - day
+  - month
+  - year
+  - season
+  - is_weekend
+  - is_new_year
+
+lgbm_pm25:
+  exp_name: lgbm_pm25_0617
+  run_name: weather_cat_no
+  pol_id: 6001
+  categories:
+  default_category:
+  search_category: false
+  default_top_features_count: 30
+  default_params:
+    n_jobs: -1
+    verbosity: -1
+    objective: *objective
+    metric: *metric
+    boosting_type: gbdt
+    extra_trees: true
+    n_estimators: 2100
+    num_leaves: 100
+    learning_rate: 0.01
+    subsample: 0.7
+    subsample_freq: 5
+    subsample_for_bin: 100000
+    min_child_samples: 30
+    reg_alpha: 0.1
+    reg_lambda: 0.3
+    max_depth: 10
+    max_bin: 200
+  prediction_value_type: AQI
+  columns_filters: *columns_filters_gen
+  columns_selected:
+  - AQI_PM25
+  - Wx
+  - Wy
+  - tmin
+  - prcp
