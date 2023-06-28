@@ -9,15 +9,15 @@ period-settings:
 split_periods:
 #  train_date_to: '2023-04-30'
   # val_date_to: '2023-06-17'
-  val_date_to: '2023-03-13'
+  val_date_to: '2023-06-17'
   forecast_period: &forecast_period 7
   remove_days_at_start: 90
 
 metric: &metric rmse
 
 tft_pm25:
-  exp_name: tft_pm25_0313
-  run_name: year_weather_batch_128_lr_01_grad_clip_03
+  exp_name: tft_pm25_0617
+  run_name: weather_year_batch_128_cat_no
   pol_id: 6001
   prediction_value_type: AQI
 
@@ -30,8 +30,6 @@ tft_pm25:
     static_reals:
       - year
     time_varying_known_categoricals:
-      - month
-      - weekday
     time_varying_known_reals:
       - Wx
       - Wy

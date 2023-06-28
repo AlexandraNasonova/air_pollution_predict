@@ -17,12 +17,12 @@ stages:
       params.yaml:
         metric: rmse
         split_periods:
-          val_date_to: '2023-03-13'
+          val_date_to: '2023-06-17'
           forecast_period: 7
           remove_days_at_start: 90
         tft_pm25:
-          exp_name: tft_pm25_0313
-          run_name: year_weather_batch_128_lr_01_grad_clip_03
+          exp_name: tft_pm25_0617
+          run_name: weather_year_batch_128_cat_no
           pol_id: 6001
           prediction_value_type: AQI
           dataset_params:
@@ -34,8 +34,6 @@ stages:
             static_reals:
             - year
             time_varying_known_categoricals:
-            - month
-            - weekday
             time_varying_known_reals:
             - Wx
             - Wy
@@ -56,8 +54,8 @@ stages:
             reduce_on_plateau_patience: 4
     outs:
     - path: ../../experiments_results/tft/6001/metrics.json
-      md5: 573ddd9b841b11d3f9fcf2a28395d87d
-      size: 49
+      md5: fd4b8165412d2899ab5394ff9405e9c8
+      size: 47
     - path: ../../experiments_results/tft/6001/model.ckpt
-      md5: bcfafc1a1476f030e0d74658a6312cc8
-      size: 796054
+      md5: e8e7e47761465792b4c17ef8fec44b18
+      size: 789466

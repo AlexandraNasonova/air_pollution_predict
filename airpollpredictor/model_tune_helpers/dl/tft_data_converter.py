@@ -48,10 +48,12 @@ class TemporaryFusionTransformerAdapter:
         df[self._target_column] = df[self._target_column].astype(float)
 
     def __columns_to_categories(self, df: pd.DataFrame):
-        for col in self._dataset_params["time_varying_known_categoricals"]:
-            df[col] = df[col].astype(str).astype("category")
-        for col in self._dataset_params["group_ids"]:
-            df[col] = df[col].astype(str).astype("category")
+        if self._dataset_params["time_varying_known_categoricals"]:
+            for col in self._dataset_params["time_varying_known_categoricals"]:
+                df[col] = df[col].astype(str).astype("category")
+        if self._dataset_params["group_ids"]:
+            for col in self._dataset_params["group_ids"]:
+                df[col] = df[col].astype(str).astype("category")
 
     @staticmethod
     def __merge_train_val(df_train: pd.DataFrame, df_val: pd.DataFrame):
@@ -69,7 +71,9 @@ class TemporaryFusionTransformerAdapter:
         time_varying_known_reals = [settings.DATE_COLUMN_NUM_IND_NAME]
         if self._dataset_params["time_varying_known_reals"]:
             time_varying_known_reals += self._dataset_params["time_varying_known_reals"]
-
+        time_varying_known_categoricals = []
+        if self._dataset_params["time_varying_known_categoricals"]:
+            time_varying_known_categoricals = self._dataset_params["time_varying_known_categoricals"]
         self._training = TimeSeriesDataSet(
             df[lambda x: x[settings.DATE_COLUMN_NUM_IND_NAME] <= training_cutoff],
             time_idx=settings.DATE_COLUMN_NUM_IND_NAME,
@@ -81,8 +85,8 @@ class TemporaryFusionTransformerAdapter:
             min_prediction_length=1,
             max_prediction_length=max_prediction_length,
             # static_categoricals=params["group_ids"],
-            static_reals=[] ,#self._dataset_params["static_reals"],
-            time_varying_known_categoricals=self._dataset_params["time_varying_known_categoricals"],
+            static_reals=self._dataset_params["static_reals"],
+            time_varying_known_categoricals=time_varying_known_categoricals,
             time_varying_known_reals=time_varying_known_reals,
             time_varying_unknown_categoricals=[],
             time_varying_unknown_reals=[],
